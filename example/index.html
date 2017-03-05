@@ -20,7 +20,7 @@
 </head>
 <body>
 <div id="map"></div>
-<script src="lib/measure-tool.js"></script>
+<script src="../lib/MeasureTool.js"></script>
 <script>
   var map;
   function initMap() {
@@ -29,6 +29,7 @@
       zoom: 8
     });
     var measureTool = new MeasureTool(map);
+    console.log(measureTool.map);
 
   }
 </script>

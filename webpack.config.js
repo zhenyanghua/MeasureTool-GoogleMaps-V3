@@ -3,7 +3,7 @@ var path = require('path');
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var env = require('yargs').argv.env;
 
-var libraryName = 'measure-tool';
+var libraryName = 'MeasureTool';
 
 var plugins = [], outputFile;
 
@@ -40,7 +40,7 @@ var config = {
   },
   resolve: {
     modules: [path.resolve('./src')],
-    extensions: ['.json', '.js']
+    extensions: ['.js']
   },
   plugins: plugins
 };
