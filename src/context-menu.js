@@ -1,3 +1,5 @@
+import css from 'context-menu.scss';
+
 export default class ContextMenu {
 
   get left() { return this._containerDiv.getBoundingClientRect().left; }
@@ -5,8 +7,15 @@ export default class ContextMenu {
   get width() { return this._containerDiv.getBoundingClientRect().width; }
   get height() { return this._containerDiv.getBoundingClientRect().height; }
 
-  constructor(div) {
+  constructor(div, options) {
+    this._defaultOptions = {
+      width: 150
+    };
+    this._options = Object.assign({}, this._defaultOptions, options || {});
+    this._parentDiv = div;
     this._containerDiv = document.createElement("div");
+    this._containerDiv.classList.add("measure-tool-context-menu");
+    this._containerDiv.stylesheet = css;
     this._containerDiv.oncontextmenu = event => event.preventDefault();
     this._list = document.createElement("ul");
     this._containerDiv.appendChild(this._list);
@@ -50,9 +59,17 @@ export default class ContextMenu {
     this._isVisible = true;
     this._containerDiv.style.cssText = `
       display: block;
-      position: absolute; 
-      top: ${point.y}px; 
-      left: ${point.x}px;
+      visibility: hidden;
+      position: absolute;
+      width: ${this._options.width}px; 
+    `;
+    let isXOverflow = this._parentDiv.getBoundingClientRect().width <= point.x + this.width;
+    let isYOverflow = this._parentDiv.getBoundingClientRect().height <= point.y + this.height;
+
+    this._containerDiv.style.cssText += `
+      ${isXOverflow ? "right: 0px;" : "left: " + point.x + "px;"}
+      ${isYOverflow ? "bottom: 14px;" : "top: " + point.y + "px;"}
+      visibility: visible;
     `;
   }
 

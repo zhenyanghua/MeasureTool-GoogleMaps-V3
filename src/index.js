@@ -1,13 +1,15 @@
+// import css from 'style.scss';
 import ContextMenu from './context-menu';
 
 export default class MeasureTool {
   constructor(map) {
     this._map = map;
+    this._map.setClickableIcons(false);
     this._init();
   }
 
   _init() {
-    this._contextMenu = new ContextMenu(this._map.getDiv());
+    this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
     this._startNode = this._contextMenu.addItem("Measure distance", true, this._startMeasure, this);
     this._endNode = this._contextMenu.addItem("Clear measurement", false, this._endMeasure, this);
 
@@ -25,7 +27,6 @@ export default class MeasureTool {
       this._firstPoint = mouseEvent.latLng;
       this._contextMenu.show(this._projection.fromLatLngToContainerPixel(mouseEvent.latLng));
     });
-
     document.addEventListener('keydown', event => {
       if (event.which === 27) {
         this._contextMenu.hide();

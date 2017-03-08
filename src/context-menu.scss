@@ -1,0 +1,18 @@
+.measure-tool-context-menu {
+  ul {
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid grey;
+    background-color: white;
+
+    li {
+      padding: 3px 10px;
+      cursor: pointer;
+      background-color: white;
+
+      &:hover {
+        background-color: azure;
+      }
+    }
+  }
+}
