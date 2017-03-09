@@ -1,3 +1,4 @@
+import {Config} from './config';
 import css from 'context-menu.scss';
 
 export default class ContextMenu {
@@ -14,7 +15,7 @@ export default class ContextMenu {
     this._options = Object.assign({}, this._defaultOptions, options || {});
     this._parentDiv = div;
     this._containerDiv = document.createElement("div");
-    this._containerDiv.classList.add("measure-tool-context-menu");
+    this._containerDiv.classList.add(`${Config.prefix}-context-menu`);
     this._containerDiv.stylesheet = css;
     this._containerDiv.oncontextmenu = event => event.preventDefault();
     this._list = document.createElement("ul");

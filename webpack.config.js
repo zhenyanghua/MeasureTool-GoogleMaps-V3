@@ -55,7 +55,7 @@ var config = {
     ]
   },
   resolve: {
-    modules: [path.resolve('./src')],
+    modules: [path.resolve('./src'), "node_modules"],
     extensions: ['.js']
   },
   plugins: plugins
