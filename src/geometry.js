@@ -13,7 +13,7 @@ export class Geometry {
       "type": "FeatureCollection",
       "paths": [this._path.toJSON()],
       "nodes": this._nodes.map(x => x.toJSON())
-    }
+    };
   }
 
   addNode(node) {
@@ -42,7 +42,7 @@ export class Node {
       "properties": {
         "name": this._label
       }
-    }
+    };
   }
 }
 
@@ -66,6 +66,6 @@ export class Path {
       "properties": {
         "distance": this._distance
       }
-    }
+    };
   }
 }

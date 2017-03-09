@@ -51,6 +51,7 @@ export default class MeasureTool {
     this._contextMenu.toggleItems([this._endElementNode], [this._startElementNode]);
 
     this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
+    this._map.addListener('zoom_changed', () => this._redrawOverlay());
   }
 
   _endMeasure() {
@@ -58,6 +59,7 @@ export default class MeasureTool {
     this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
 
     google.maps.event.clearListeners(this._map, 'click');
+    google.maps.event.clearListeners(this._map, 'resize');
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
@@ -77,39 +79,36 @@ export default class MeasureTool {
     // Add svg to Pane
     this._svgOverlay = select(this._overlay.getPanes().overlayMouseTarget)
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
-      .append('svg').attr('class',`${Config.prefix}-svg-overlay`)
+      .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
+    let path = geoPath().projection(this._projectionUtility.latLngToSvgPoint.bind(this));
+
+    this._circles = this._svgOverlay
+      .selectAll('circle')
+      .data(this._geometry ? this._geometry.jsonNode : []);
   }
 
+  /**
+   * Update svg stuff here
+   * @private
+   */
   _onDrawOverlay() {
-    let path = geoPath().projection(this._projectionUtility.latLngToSvgPoint.bind(this));
-    // Create d3 circle svg element
-    let circle = this._svgOverlay
-      .selectAll('circle')
-        .data(this._geometry ? this._geometry.jsonNode : [])
-          .attr('class','cover-circle')
-          .style('fill','white')
-          .style('stroke','black')
-          .style('stroke-width','2.5px')
-          .attr('r',5)
-          .attr('cx', d => this._projectionUtility
-              .latLngToSvgPoint(d.geometry.coordinates)[0])
-          .attr('cy', d => this._projectionUtility
-              .latLngToSvgPoint(d.geometry.coordinates)[1])
-          .on('mouseover', function(d){select(this).attr('r',7)})
-          .on('mouseout', function(d){select(this).attr('r',5)})
-          .on('touchstart', function(d){select(this).attr('r',7)})
-          .on('touchleave', function(d){select(this).attr('r',5)})
-          // .on('mousedown', d => this.origin_point =
-          //   [d.geometry.coordinates[d.geometry.coordinates.length-1][0],
-          //    d.geometry.coordinates[d.geometry.coordinates.length-1][1]])
-          // .call(this._dragCallback())
-        .enter()
-        .append('circle')
+    this._updateCircle();
   }
 
   _onRemoveOverlay() {
     select(`.${Config.prefix}-measure-points`).remove();
+  }
+
+  /**
+   * In some cases we must redraw overlay so the svg container size gets recomputed
+   * whenever the map scale changes. we usually bind this map resize or similar events.
+   * @private
+   */
+  _redrawOverlay() {
+    this._onRemoveOverlay();
+    this._setOverlay();
+    this._overlay.draw();
   }
 
   _checkClick(mouseEvent){
@@ -118,8 +117,32 @@ export default class MeasureTool {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addWayPoints(latLng);
     }
-    // Force to reset the Overley everytime one data is updated
-    this._overlay.setMap(null);
-    this._setOverlay();
+    this._overlay.draw();
+  }
+
+  _updateCircle() {
+    // join with you data
+    this._circles = this._circles.data(this._geometry ? this._geometry.jsonNode : []);
+    // enter and append them
+    this._circles
+      .enter()
+      .append('circle')
+        .attr('class', 'cover-circle')
+        .style('fill', 'white')
+        .style('stroke', 'black')
+        .style('stroke-width', '2.5px')
+        .attr('r', 5)
+        .attr('cx', d => this._projectionUtility
+          .latLngToSvgPoint(d.geometry.coordinates)[0])
+        .attr('cy', d => this._projectionUtility
+          .latLngToSvgPoint(d.geometry.coordinates)[1])
+        .on('mouseover', function(d){select(this).attr('r',7)})
+        .on('mouseout', function(d){select(this).attr('r',5)})
+        .on('touchstart', function(d){select(this).attr('r',7)})
+        .on('touchleave', function(d){select(this).attr('r',5)})
+    // .on('mousedown', d => this.origin_point =
+    //   [d.geometry.coordinates[d.geometry.coordinates.length-1][0],
+    //    d.geometry.coordinates[d.geometry.coordinates.length-1][1]])
+    // .call(this._dragCallback())
   }
 };
