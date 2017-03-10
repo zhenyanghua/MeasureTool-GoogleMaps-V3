@@ -1,7 +1,6 @@
 export class Geometry {
   get nodes() { return this._nodes; }
-  get path() { return this._path; }
-  get jsonNode() { return this._nodes.map(x => x.toJSON()); }
+  get paths() { return [this._path.toJSON()]; }
 
   constructor() {
     this._path = new Path();
@@ -12,17 +11,17 @@ export class Geometry {
     return {
       "type": "FeatureCollection",
       "paths": [this._path.toJSON()],
-      "nodes": this._nodes.map(x => x.toJSON())
+      "nodes": this._nodes
     };
   }
 
   addNode(node) {
-    this._nodes.push(node);
+    this._nodes.push(node.toJSON());
   }
 
   addWayPoints(point) {
     this._path.addWayPoint(point);
-    this._nodes.push(new Node(point));
+    this.addNode(new Node(point));
   }
 }
 

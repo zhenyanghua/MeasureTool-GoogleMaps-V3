@@ -3,7 +3,7 @@ import {Config} from './config';
 import ContextMenu from './context-menu';
 import {select, selectAll} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
-import {geoPath} from 'd3-geo';
+import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry} from 'geometry';
 
 export default class MeasureTool {
@@ -81,11 +81,13 @@ export default class MeasureTool {
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
       .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
-    let path = geoPath().projection(this._projectionUtility.latLngToSvgPoint.bind(this));
+    this._svgOverlay
+      .selectAll("path")
+      .data(this._geometry ? this._geometry.path : []);
 
-    this._circles = this._svgOverlay
+    this._svgOverlay
       .selectAll('circle')
-      .data(this._geometry ? this._geometry.jsonNode : []);
+      .data(this._geometry ? this._geometry.nodes : []);
   }
 
   /**
@@ -93,7 +95,8 @@ export default class MeasureTool {
    * @private
    */
   _onDrawOverlay() {
-    this._updateCircle();
+    this._updatePath();
+    this._updateCircles();
   }
 
   _onRemoveOverlay() {
@@ -120,11 +123,12 @@ export default class MeasureTool {
     this._overlay.draw();
   }
 
-  _updateCircle() {
-    // join with you data
-    this._circles = this._circles.data(this._geometry ? this._geometry.jsonNode : []);
-    // enter and append them
-    this._circles
+  _updateCircles() {
+    // join with old data
+    let circles = this._svgOverlay.selectAll("circle")
+      .data(this._geometry ? this._geometry.nodes : []);
+    // enter and seat the new data with same style.
+    circles
       .enter()
       .append('circle')
         .attr('class', 'cover-circle')
@@ -144,5 +148,39 @@ export default class MeasureTool {
     //   [d.geometry.coordinates[d.geometry.coordinates.length-1][0],
     //    d.geometry.coordinates[d.geometry.coordinates.length-1][1]])
     // .call(this._dragCallback())
+
+    circles.exit().remove();
+  }
+
+  _updatePath() {
+    // Create a generic transformation,
+    // geoTransform implements the project.stream which can be
+    // used in the geoPath.projection.
+    let self = this;
+    let gmTransform = geoTransform({
+      point: function (x, y) {
+        let point = self._projectionUtility.latLngToSvgPoint([x,y]);
+        this.stream.point(point[0], point[1]);
+      }
+    });
+    // geoPath uses the project specified to convert the latlng to
+    // svg path coords.
+    let gmPath = geoPath().projection(gmTransform);
+
+    // Update the one and the only one path with the new data.
+    let path = this._svgOverlay.selectAll("path")
+      .data(this._geometry ? this._geometry.paths : [])
+        .style('fill','none')
+        .style('stroke','black')
+        .style('stroke-width','2.5px')
+        .attr('d', gmPath)
+    // There is no new data in the path collection, we just need to
+    // replace the old path data with the new one. so no need to assign
+    // the path styles to nothing. just enter the replacement and seat it.
+    path
+      .enter()
+      .append('path')
+
+    path.exit().remove();
   }
 };
