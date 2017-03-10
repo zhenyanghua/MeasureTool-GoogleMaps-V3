@@ -1,12 +1,16 @@
 import css from 'index.scss';
 import {Config} from './config';
 import ContextMenu from './context-menu';
-import {select, selectAll} from 'd3-selection';
+import {select, selectAll, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
 import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry} from 'geometry';
+import {drag} from 'd3-drag';
+import Helper from './helper';
 
 export default class MeasureTool {
+  get version() { return `${Config.prefix}-v${Config.version}`; };
+
   constructor(map) {
     this._map = map;
     this._map.setClickableIcons(false);
@@ -119,14 +123,17 @@ export default class MeasureTool {
     if(selectAll('circle[r="7"]').size() == 0){
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addWayPoints(latLng);
+      this._overlay.draw();
     }
-    this._overlay.draw();
+
   }
 
   _updateCircles() {
+    let self = this;
     // join with old data
     let circles = this._svgOverlay.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : []);
+
     // enter and seat the new data with same style.
     circles
       .enter()
@@ -147,9 +154,9 @@ export default class MeasureTool {
     // .on('mousedown', d => this.origin_point =
     //   [d.geometry.coordinates[d.geometry.coordinates.length-1][0],
     //    d.geometry.coordinates[d.geometry.coordinates.length-1][1]])
-    // .call(this._dragCallback())
+        .call(this._onDragCircle());
 
-    circles.exit().remove();
+    circles.filter(".removed-circle").remove();
   }
 
   _updatePath() {
@@ -173,14 +180,70 @@ export default class MeasureTool {
         .style('fill','none')
         .style('stroke','black')
         .style('stroke-width','2.5px')
-        .attr('d', gmPath)
+        .attr('d', gmPath);
     // There is no new data in the path collection, we just need to
     // replace the old path data with the new one. so no need to assign
     // the path styles to nothing. just enter the replacement and seat it.
     path
       .enter()
-      .append('path')
+      .append('path');
 
     path.exit().remove();
+  }
+
+  _onDragCircle() {
+    let self = this;
+    let isDragged = false;
+
+    let circleDrag = drag()
+      .on('drag', function (d) {
+        isDragged = true;
+
+        select(this)
+          .attr('cx', d.x = event.x)
+          .attr('cy', d.y = event.y);
+
+        // update path
+        let gmTransform = geoTransform({
+          point: function (x, y) {
+            let point = [];
+            if (x === d.geometry.coordinates[0] &&
+                y === d.geometry.coordinates[1]) {
+              point[0] = event.x;
+              point[1] = event.y;
+            } else {
+              point = self._projectionUtility.latLngToSvgPoint([x,y]);
+            }
+            this.stream.point(point[0], point[1]);
+          }
+        });
+        // geoPath uses the project specified to convert the latlng to
+        // svg path coords.
+        let gmPath = geoPath().projection(gmTransform);
+
+        self._svgOverlay.selectAll("path")
+          .attr('d', gmPath)
+
+      });
+
+    circleDrag.on('start', function(d) {
+      event.sourceEvent.stopPropagation();
+      select(this).attr('r', 7);
+    });
+
+    circleDrag.on('end', function (d, i) {
+      if (!isDragged) {
+        self._geometry.removeWayPoints(i);
+        select(this).attr('class', 'removed-circle');
+      } else {
+        self._geometry.updateWayPoints(
+          d.geometry.coordinates,
+          self._projectionUtility.svgPointToLatLng([event.x, event.y]));
+      }
+      isDragged = false;
+      self._overlay.draw();
+    });
+
+    return circleDrag;
   }
 };

@@ -23,6 +23,22 @@ export class Geometry {
     this._path.addWayPoint(point);
     this.addNode(new Node(point));
   }
+
+  updateWayPoints(curPoint, newPoint) {
+    for (var i = 0; i < this._nodes.length; i++) {
+      if (this._nodes[i].geometry.coordinates[0] === curPoint[0] &&
+        this._nodes[i].geometry.coordinates[1] === curPoint[1]) {
+        this._nodes[i].geometry.coordinates = newPoint;
+        this._path.updateWayPoint(i, newPoint);
+        return;
+      }
+    }
+  }
+
+  removeWayPoints(i) {
+    this._nodes.splice(i, 1);
+    this._path.removeWayPoint(i);
+  }
 }
 
 export class Node {
@@ -53,6 +69,14 @@ export class Path {
 
   addWayPoint(point) {
     this._coords.push(point);
+  }
+
+  updateWayPoint(index, newPoint) {
+    this._coords[index] = newPoint;
+  }
+
+  removeWayPoint(index) {
+    this._coords.splice(index, 1);
   }
 
   toJSON() {
