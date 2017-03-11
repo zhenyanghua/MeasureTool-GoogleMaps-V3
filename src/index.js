@@ -132,7 +132,21 @@ export default class MeasureTool {
     let self = this;
     // join with old data
     let circles = this._svgOverlay.selectAll("circle")
-      .data(this._geometry ? this._geometry.nodes : []);
+      .data(this._geometry ? this._geometry.nodes : [])
+        .attr('class', 'cover-circle')
+        .style('fill', 'white')
+        .style('stroke', 'black')
+        .style('stroke-width', '2.5px')
+        .attr('r', 5)
+        .attr('cx', d => this._projectionUtility
+          .latLngToSvgPoint(d.geometry.coordinates)[0])
+        .attr('cy', d => this._projectionUtility
+          .latLngToSvgPoint(d.geometry.coordinates)[1])
+        .on('mouseover', function(d){select(this).attr('r',6)})
+        .on('mouseout', function(d){select(this).attr('r',5)})
+        .on('touchstart', function(d){select(this).attr('r',6)})
+        .on('touchleave', function(d){select(this).attr('r',5)})
+        .call(this._onDragCircle());
 
     // enter and seat the new data with same style.
     circles
@@ -147,16 +161,13 @@ export default class MeasureTool {
           .latLngToSvgPoint(d.geometry.coordinates)[0])
         .attr('cy', d => this._projectionUtility
           .latLngToSvgPoint(d.geometry.coordinates)[1])
-        .on('mouseover', function(d){select(this).attr('r',7)})
+        .on('mouseover', function(d){select(this).attr('r',6)})
         .on('mouseout', function(d){select(this).attr('r',5)})
-        .on('touchstart', function(d){select(this).attr('r',7)})
+        .on('touchstart', function(d){select(this).attr('r',6)})
         .on('touchleave', function(d){select(this).attr('r',5)})
-    // .on('mousedown', d => this.origin_point =
-    //   [d.geometry.coordinates[d.geometry.coordinates.length-1][0],
-    //    d.geometry.coordinates[d.geometry.coordinates.length-1][1]])
         .call(this._onDragCircle());
 
-    circles.filter(".removed-circle").remove();
+    selectAll(".removed-circle").remove();
   }
 
   _updatePath() {
@@ -200,8 +211,8 @@ export default class MeasureTool {
         isDragged = true;
 
         select(this)
-          .attr('cx', d.x = event.x)
-          .attr('cy', d.y = event.y);
+          .attr('cx', event.x)
+          .attr('cy', event.y);
 
         // update path
         let gmTransform = geoTransform({
@@ -228,13 +239,13 @@ export default class MeasureTool {
 
     circleDrag.on('start', function(d) {
       event.sourceEvent.stopPropagation();
-      select(this).attr('r', 7);
+      select(this).raise().attr('r', 7);
     });
 
     circleDrag.on('end', function (d, i) {
       if (!isDragged) {
         self._geometry.removeWayPoints(i);
-        select(this).attr('class', 'removed-circle');
+        select(this).classed('removed-circle', true);
       } else {
         self._geometry.updateWayPoints(
           d.geometry.coordinates,
