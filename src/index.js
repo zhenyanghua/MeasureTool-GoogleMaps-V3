@@ -6,7 +6,6 @@ import ProjectionUtility from './projection-utility';
 import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
-import Helper from './helper';
 
 export default class MeasureTool {
   get version() { return `${Config.prefix}-v${Config.version}`; };
@@ -56,6 +55,7 @@ export default class MeasureTool {
 
     this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
     this._map.addListener('zoom_changed', () => this._redrawOverlay());
+    this._map.setOptions({draggableCursor: 'default'});
   }
 
   _endMeasure() {
@@ -67,7 +67,7 @@ export default class MeasureTool {
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
-
+    this._map.setOptions({draggableCursor: null});
   }
 
   _setOverlay() {
@@ -85,7 +85,15 @@ export default class MeasureTool {
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
       .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
-    this._svgOverlay
+    this._pathBase = this._svgOverlay
+      .append('g').attr('class', 'base');
+    this._pathBase
+      .selectAll("path")
+      .data(this._geometry ? this._geometry.path : []);
+
+    this._pathTick = this._svgOverlay
+      .append('g').attr('class', 'tick');
+    this._pathTick
       .selectAll("path")
       .data(this._geometry ? this._geometry.path : []);
 
@@ -186,7 +194,8 @@ export default class MeasureTool {
     let gmPath = geoPath().projection(gmTransform);
 
     // Update the one and the only one path with the new data.
-    let path = this._svgOverlay.selectAll("path")
+    let pathBase = this._pathBase
+      .selectAll("path")
       .data(this._geometry ? this._geometry.paths : [])
         .style('fill','none')
         .style('stroke','black')
@@ -195,11 +204,26 @@ export default class MeasureTool {
     // There is no new data in the path collection, we just need to
     // replace the old path data with the new one. so no need to assign
     // the path styles to nothing. just enter the replacement and seat it.
-    path
+    pathBase
       .enter()
       .append('path');
 
-    path.exit().remove();
+    pathBase.exit().remove();
+
+    let pathTick = this._pathTick
+      .selectAll("path")
+      .data(this._geometry ? this._geometry.paths : [])
+      .style('fill','none')
+      .style('stroke','black')
+      .style('stroke-width','8px')
+      .style('stroke-dasharray', '1, 20')
+      .attr('d', gmPath);
+
+    pathTick
+      .enter()
+      .append('path');
+
+    pathTick.exit().remove();
   }
 
   _onDragCircle() {
@@ -240,9 +264,11 @@ export default class MeasureTool {
     circleDrag.on('start', function(d) {
       event.sourceEvent.stopPropagation();
       select(this).raise().attr('r', 7);
+      self._map.setOptions({scrollwheel: false, zomControl: false});
     });
 
     circleDrag.on('end', function (d, i) {
+      self._map.setOptions({scrollwheel: true, zomControl: true});
       if (!isDragged) {
         self._geometry.removeWayPoints(i);
         select(this).classed('removed-circle', true);
