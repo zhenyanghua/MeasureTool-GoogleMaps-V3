@@ -1,6 +1,15 @@
 export class Geometry {
   get nodes() { return this._nodes; }
   get paths() { return [this._path.toJSON()]; }
+  get pathSegments() {
+    let segments = [];
+    if (this._path.coords.length > 1) {
+      for (let i = 1; i < this._path.coords.length; i++) {
+        segments.push([this._path.coords[i - 1], this._path.coords[i]]);
+      }
+    }
+    return segments;
+  }
 
   constructor() {
     this._path = new Path();
@@ -39,6 +48,7 @@ export class Geometry {
     this._nodes.splice(i, 1);
     this._path.removeWayPoint(i);
   }
+
 }
 
 export class Node {
@@ -62,6 +72,8 @@ export class Node {
 }
 
 export class Path {
+  get coords() { return this._coords; }
+
   constructor(distance) {
     this._coords = [];
     this._distance = distance || 0;

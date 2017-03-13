@@ -6,6 +6,7 @@ import ProjectionUtility from './projection-utility';
 import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
+import Helper from './helper';
 
 export default class MeasureTool {
   get version() { return `${Config.prefix}-v${Config.version}`; };
@@ -97,9 +98,21 @@ export default class MeasureTool {
       .selectAll("path")
       .data(this._geometry ? this._geometry.path : []);
 
-    this._svgOverlay
+    this._nodeCircles =  this._svgOverlay
+      .append('g').attr('class', 'node-circle');
+    this._nodeCircles
       .selectAll('circle')
       .data(this._geometry ? this._geometry.nodes : []);
+
+    this._hoverCircle = this._svgOverlay
+      .append('g').attr('class', 'hover-circle');
+    this._hoverCircle
+      .append("circle")
+      .style('fill', 'rgb(252, 252, 252)')
+      .style('stroke', 'rgb(100, 100, 100)')
+      .style('stroke-width', '2.5px')
+      .style('pointer-events', 'none')
+      .attr('r', 5);
   }
 
   /**
@@ -128,7 +141,7 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(selectAll('circle[r="7"]').size() == 0){
+    if(this._nodeCircles.selectAll('circle[r="7"]').size() == 0){
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addWayPoints(latLng);
       this._overlay.draw();
@@ -139,7 +152,7 @@ export default class MeasureTool {
   _updateCircles() {
     let self = this;
     // join with old data
-    let circles = this._svgOverlay.selectAll("circle")
+    let circles = this._nodeCircles.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : [])
         .attr('class', 'cover-circle')
         .style('fill', 'white')
@@ -175,7 +188,7 @@ export default class MeasureTool {
         .on('touchleave', function(d){select(this).attr('r',5)})
         .call(this._onDragCircle());
 
-    selectAll(".removed-circle").remove();
+    this._nodeCircles.selectAll(".removed-circle").remove();
   }
 
   _updatePath() {
@@ -214,16 +227,33 @@ export default class MeasureTool {
       .selectAll("path")
       .data(this._geometry ? this._geometry.paths : [])
       .style('fill','none')
-      .style('stroke','black')
+      .style('stroke','transparent')
       .style('stroke-width','8px')
-      .style('stroke-dasharray', '1, 20')
-      .attr('d', gmPath);
+      .attr('d', gmPath)
+      .on('mousemove', function(d) {
+        // get the nearest touch point on the path
+        // iterate through the all segments,
+        // for each segment find the touch point and the distance
+        let point = self._projectionUtility.latLngToSvgPoint(Helper.getPointOnPath(
+          self._projectionUtility.svgPointToLatLng([event.offsetX,  event.offsetY]),
+          self._pathsSegments));
+        self._hoverCircle.select("circle")
+          .attr('cx', point[0])
+          .attr('cy', point[1]);
+      })
+      .on('mouseout', function (d) {
+        self._hoverCircle.select("circle")
+          .attr('cx', null)
+          .attr('cy', null);
+      });
 
     pathTick
       .enter()
       .append('path');
 
     pathTick.exit().remove();
+
+    this._pathsSegments = this._geometry ? this._geometry.pathSegments : [];
   }
 
   _onDragCircle() {
@@ -255,10 +285,8 @@ export default class MeasureTool {
         // geoPath uses the project specified to convert the latlng to
         // svg path coords.
         let gmPath = geoPath().projection(gmTransform);
-
         self._svgOverlay.selectAll("path")
           .attr('d', gmPath)
-
       });
 
     circleDrag.on('start', function(d) {
@@ -283,4 +311,5 @@ export default class MeasureTool {
 
     return circleDrag;
   }
+
 };
