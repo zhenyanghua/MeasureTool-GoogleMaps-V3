@@ -5,3 +5,28 @@
   width: 8000px;
   height: 8000px;
 }
+
+.dragging-circle,
+.cover-circle {
+  fill: white;
+  stroke: black;
+  stroke-width: 2.5px;
+}
+.grey-circle {
+  fill: rgb(252, 252, 252);
+  stroke: rgb(100, 100, 100);
+  stroke-width: 2.5px;
+  pointer-events: none;
+}
+
+.base-path {
+  fill: none;
+  stroke: black;
+  stroke-width: 2.5px;
+}
+
+.aux-path {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 8px;
+}

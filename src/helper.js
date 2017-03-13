@@ -8,21 +8,26 @@ export default class Helper {
       cbArgs = arguments;
       clearTimeout(timeout);
       timeout = setTimeout(later, deley);
-    }
+    };
   }
 
   static getPointOnPath(point, segments) {
-    if (segments.length === 0) return [null, null];
-    let minDistance = Infinity, closestPoint = undefined;
-    for (let i = 0; i < segments.length; i++) {
-      let touchPoint = this._findTouchPoint(segments[i], point);
-      let sqDistance = Math.pow(touchPoint[0] - point[0], 2) + Math.pow(touchPoint[1] - point[1], 2);
-      if (sqDistance < minDistance) {
-        minDistance = sqDistance;
-        closestPoint = touchPoint;
+    let minDistance = Infinity, closestPoint = [null, null], segmentIndex;
+    if (segments.length > 0) {
+      for (let i = 0; i < segments.length; i++) {
+        let touchPoint = this._findTouchPoint(segments[i], point);
+        let sqDistance = Math.pow(touchPoint[0] - point[0], 2) + Math.pow(touchPoint[1] - point[1], 2);
+        if (sqDistance < minDistance) {
+          minDistance = sqDistance;
+          closestPoint = touchPoint;
+          segmentIndex = i;
+        }
       }
     }
-    return closestPoint;
+    return {
+      touchPoint: closestPoint,
+      segmentIndex: segmentIndex
+    };
   }
 
   static _findTouchPoint(segment, point) {
