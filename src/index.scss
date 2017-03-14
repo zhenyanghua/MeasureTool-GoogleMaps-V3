@@ -30,3 +30,19 @@
   stroke: transparent;
   stroke-width: 8px;
 }
+
+.tick-path {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1px;
+  pointer-events: none;
+}
+
+.ticks {
+  pointer-events: none;
+  marker {
+    path {
+      fill: yellow;
+    }
+  }
+}

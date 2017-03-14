@@ -12,7 +12,7 @@ export class Geometry {
   }
 
   constructor() {
-    this._path = new Path();
+    this._path = new Path([]);
     this._nodes = [];
   }
 
@@ -72,8 +72,8 @@ export class Node {
 export class Path {
   get coords() { return this._coords; }
 
-  constructor(distance) {
-    this._coords = [];
+  constructor(points, distance) {
+    this._coords = points;
     this._distance = distance || 0;
   }
 

@@ -48,11 +48,13 @@ export default class Helper {
    *
    * @param segments
    * @param length
+   * @param includeSegmentNodes
    */
-  static interpolatePointsOnPath(segments, length) {
+  static interpolatePointsOnPath(segments, length, includeSegmentNodes = false) {
     if (segments.length === 0) return [];
     let lastSegmentLength = 0, curPoint = segments[0][0], points = [];
-    for (var i = 0; i < segments.length; i++) {
+    for (let i = 0; i < segments.length; i++) {
+      if (includeSegmentNodes) points.push(segments[i][0]);
       let segmentLength = this._getlengthBetween(segments[i][0], segments[i][1]);
       if (lastSegmentLength + segmentLength < length) {
         segmentLength += lastSegmentLength;
@@ -63,14 +65,16 @@ export default class Helper {
         segments[i][0],
         segments[i][1],
         (length - lastSegmentLength) / segmentLength);
-      segmentLength -= length - lastSegmentLength;
+      segmentLength -= (length - lastSegmentLength);
       points.push(curPoint);
       while(length < segmentLength) {
         curPoint = this._interpolate(curPoint, segments[i][1], length / segmentLength);
         points.push(curPoint);
         segmentLength -= length;
+        lastSegmentLength = segmentLength;
       }
     }
+    if (includeSegmentNodes) points.push(segments[segments.length - 1][1]);
     return points;
   }
 
@@ -108,10 +112,11 @@ export default class Helper {
    * @private
    */
   static _interpolate(p1, p2, fraction) {
-    return google.maps.geometry.spherical.interpolate(
-      new google.maps.LatLng(p1[1], p1[0]),
-      new google.maps.LatLng(p2[1], p2[0]),
-      fraction
-    );
+    // use interception equation y = mx + b
+    let m = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+    let b = p1[1] - m * p1[0];
+    let x = p1[0] + (p2[0] - p1[0]) * fraction;
+    let y = m * x + b;
+    return [x, y];
   }
 }
