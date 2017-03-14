@@ -98,6 +98,12 @@ export default class MeasureTool {
       .selectAll("path")
       .data(this._geometry ? this._geometry.path : []);
 
+    this._ticks = this._svgOverlay
+      .append('g').attr('class', 'ticks');
+    this._ticks
+      .selectAll("marker")
+      .data()
+
     this._nodeCircles =  this._svgOverlay
       .append('g').attr('class', 'node-circle');
     this._nodeCircles
@@ -119,6 +125,7 @@ export default class MeasureTool {
    */
   _onDrawOverlay() {
     this._updatePath();
+    this._updateTicks();
     this._updateCircles();
   }
 
@@ -195,7 +202,7 @@ export default class MeasureTool {
         this.stream.point(point[0], point[1]);
       }
     });
-    // geoPath uses the project specified to convert the latlng to
+    // geoPath uses the projection specified to convert the latlng to
     // svg path coords.
     let gmPath = geoPath().projection(gmTransform);
 
@@ -238,6 +245,10 @@ export default class MeasureTool {
     pathAux.exit().remove();
 
     this._pathsSegments = this._geometry ? this._geometry.pathSegments : [];
+  }
+
+  _updateTicks() {
+
   }
 
   _onDragCircle() {
@@ -301,7 +312,6 @@ export default class MeasureTool {
     let isDragged = false;
     let pathDrag = drag()
       .on('drag', d => {
-        console.log("dragging.....");
         if (!isDragged) {
           isDragged = true;
           this._geometry.insertWayPoints(
