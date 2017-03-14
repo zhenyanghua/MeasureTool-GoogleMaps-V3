@@ -379,10 +379,10 @@ export default class MeasureTool {
   }
 
   _disableMapScroll() {
-    this._map.setOptions({ scrollwheel: false, zomControl: false });
+    this._map.setOptions({ scrollwheel: false, zoomControl: false });
   }
 
   _enableMapScroll() {
-    this._map.setOptions({ scrollwheel: true, zomControl: true });
+    this._map.setOptions({ scrollwheel: true, zoomControl: true });
   }
 };
