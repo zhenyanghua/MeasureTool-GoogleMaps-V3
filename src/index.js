@@ -7,7 +7,17 @@ import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry, Path} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
-
+/**
+ * TODO - change hover effect to tickPath
+ * TODO - change path drag effect on tickPath, and the drag should change the segment between two Nodes NOT ticks.
+ * TODO - when dragging, the tickPath should interpolate its segment.
+ *
+ *
+ * TODO - for every 10 ticks, create a text label for the accumulative length.
+ *
+ * TODO - performance enhance - interpolatePointsOnPath O(n * m) -> O(n)?
+ * TODO - performance enhance - getPointOnPath O(n) -> O(1)?
+ */
 export default class MeasureTool {
   get version() { return `${Config.prefix}-v${Config.version}`; };
 

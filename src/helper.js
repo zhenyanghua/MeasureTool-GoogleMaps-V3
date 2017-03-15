@@ -112,11 +112,17 @@ export default class Helper {
    * @private
    */
   static _interpolate(p1, p2, fraction) {
+    let point = google.maps.geometry.spherical.interpolate(
+      new google.maps.LatLng(p1[1], p1[0]),
+      new google.maps.LatLng(p2[1], p2[0]),
+      fraction
+    );
+    return [point.lng(), point.lat()];
     // use interception equation y = mx + b
-    let m = (p2[1] - p1[1]) / (p2[0] - p1[0]);
-    let b = p1[1] - m * p1[0];
-    let x = p1[0] + (p2[0] - p1[0]) * fraction;
-    let y = m * x + b;
-    return [x, y];
+    // let m = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+    // let b = p1[1] - m * p1[0];
+    // let x = p1[0] + (p2[0] - p1[0]) * fraction;
+    // let y = m * x + b;
+    // return [x, y];
   }
 }
