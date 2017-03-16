@@ -30,54 +30,6 @@ export default class Helper {
     };
   }
 
-  /**
-   * if last segment length (start with 0) adds current segment length is less than tick length,
-   *    segment length = last segment length + segment length
-   *    last segment length = segment length;
-   *    move on to the next segment
-   *
-   * current point = compute the latlng using fraction (tick length - last segment length ) / current segment length
-   *     between current segment start point and end point.
-   * segment length = segment length - (tick length - last segment length)
-   *
-   * While the given minimum tick length is less than the segment length,
-   *    compute the latlng at the fraction between current point and the end point.
-   *    push the latlng
-   *    assign the latlng to current point.
-   *    segment length subtracts tick length.
-   *
-   * @param segments
-   * @param length
-   * @param includeSegmentNodes
-   */
-  static interpolatePointsOnPath(segments, length, includeSegmentNodes = false) {
-    if (segments.length === 0) return [];
-    let lastSegmentLength = 0, curPoint = segments[0][0], points = [];
-    for (let i = 0; i < segments.length; i++) {
-      if (includeSegmentNodes) points.push(segments[i][0]);
-      let segmentLength = this._getlengthBetween(segments[i][0], segments[i][1]);
-      if (lastSegmentLength + segmentLength < length) {
-        segmentLength += lastSegmentLength;
-        lastSegmentLength = segmentLength;
-        continue;
-      }
-      curPoint = this._interpolate(
-        segments[i][0],
-        segments[i][1],
-        (length - lastSegmentLength) / segmentLength);
-      segmentLength -= (length - lastSegmentLength);
-      points.push(curPoint);
-      while(length < segmentLength) {
-        curPoint = this._interpolate(curPoint, segments[i][1], length / segmentLength);
-        points.push(curPoint);
-        segmentLength -= length;
-        lastSegmentLength = segmentLength;
-      }
-    }
-    if (includeSegmentNodes) points.push(segments[segments.length - 1][1]);
-    return points;
-  }
-
   static _findTouchPoint(segment, point) {
     const k = ((segment[1][1] - segment[0][1]) * (point[0] - segment[0][0]) -
                (segment[1][0] - segment[0][0]) * (point[1] - segment[0][1])) /

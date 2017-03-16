@@ -7,17 +7,7 @@ import {geoPath, geoTransform} from 'd3-geo';
 import {Geometry, Path} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
-/**
- * TODO - change hover effect to tickPath
- * TODO - change path drag effect on tickPath, and the drag should change the segment between two Nodes NOT ticks.
- * TODO - when dragging, the tickPath should interpolate its segment.
- *
- *
- * TODO - for every 10 ticks, create a text label for the accumulative length.
- *
- * TODO - performance enhance - interpolatePointsOnPath O(n * m) -> O(n)?
- * TODO - performance enhance - getPointOnPath O(n) -> O(1)?
- */
+
 export default class MeasureTool {
   get version() { return `${Config.prefix}-v${Config.version}`; };
 
@@ -108,26 +98,6 @@ export default class MeasureTool {
       .selectAll("path")
       .data(this._geometry ? this._geometry.paths : []);
 
-    this._tickPath = this._svgOverlay
-      .append('g').attr('class', 'tickPath');
-    this._tickPath
-      .selectAll("path");
-
-    this._ticks = this._svgOverlay
-      .append('g').attr('class', 'ticks');
-    this._ticks
-      .append("marker")
-      .attr('id', 'marker-small-ticks')
-      .attr('markerHeight', 5)
-      .attr('markerWidth', 2)
-      .attr('markerUnits', 'strokeWidth')
-      .attr('orient', 'auto')
-      .attr('refX', 0)
-      .attr('refY', 0)
-      .attr('viewBox', '-1 0 2 5')
-      .append('path')
-        .attr('d', 'M 0,0 m -1,0 L 1,0 L 1,5 L -1,5 Z');
-
     this._nodeCircles =  this._svgOverlay
       .append('g').attr('class', 'node-circle');
     this._nodeCircles
@@ -149,7 +119,6 @@ export default class MeasureTool {
    */
   _onDrawOverlay() {
     this._updatePath();
-    this._updateTicks();
     this._updateCircles();
   }
 
@@ -252,9 +221,9 @@ export default class MeasureTool {
       .attr('d', gmPath)
       .on('mousemove', function(d) {
         self._pointSegment = Helper.getPointOnPath(
-          self._projectionUtility.svgPointToLatLng([event.offsetX,  event.offsetY]),
-          self._pathsSegments);
-        let point = self._projectionUtility.latLngToSvgPoint(self._pointSegment.touchPoint);
+          [event.offsetX,  event.offsetY],
+          self._pathsSegementsInSvg);
+        let point = self._pointSegment.touchPoint;
         self._updateHoverCirclePosition(point[0], point[1]);
       })
       .on('mouseout', function (d) {
@@ -268,40 +237,13 @@ export default class MeasureTool {
 
     pathAux.exit().remove();
 
-    this._pathsSegments = this._geometry ? this._geometry.pathSegments : [];
-  }
-
-  _updateTicks() {
-    let self = this;
-    this._computeTickLength();
-    let points = Helper.interpolatePointsOnPath(
-      this._geometry ? this._geometry.pathSegments : [], this._tickLength, true);
-    let paths = [(new Path(points)).toJSON()];
-    let gmTransform = geoTransform({
-      point: function (x, y) {
-        let point = self._projectionUtility.latLngToSvgPoint([x,y]);
-        this.stream.point(point[0], point[1]);
-      }
-    });
-    // geoPath uses the projection specified to convert the latlng to
-    // svg path coords.
-    let gmPath = geoPath().projection(gmTransform);
-
-    // Update the one and the only one path with the new data.
-    let path = this._tickPath
-      .selectAll("path")
-      .data(paths)
-      .attr("class", "tick-path")
-      .attr('d', gmPath)
-      .attr('marker-start', `url(#marker-small-ticks)`)
-      .attr('marker-mid', `url(#marker-small-ticks)`)
-      .attr('marker-end', `url(#marker-small-ticks)`);
-
-    path
-      .enter()
-      .append('path');
-
-    path.exit().remove();
+    let pathsSegments = this._geometry ? this._geometry.pathSegments : [];
+    this._pathsSegementsInSvg = pathsSegments.map(segment => {
+      return [
+        this._projectionUtility.latLngToSvgPoint(segment[0]),
+        this._projectionUtility.latLngToSvgPoint(segment[1])
+      ];
+    })
   }
 
   _onDragCircle() {
@@ -325,13 +267,6 @@ export default class MeasureTool {
                 y === d.geometry.coordinates[1]) {
               point[0] = event.x;
               point[1] = event.y;
-              // prepare for ticks path.
-              self._geometry.updateWayPoints(
-                i,
-                self._projectionUtility.svgPointToLatLng([event.x, event.y]));
-              points = Helper.interpolatePointsOnPath(
-                self._geometry ? self._geometry.pathSegments : [], self._tickLength, true);
-              paths = [(new Path(points)).toJSON()];
             } else {
               point = self._projectionUtility.latLngToSvgPoint([x,y]);
             }
@@ -345,9 +280,6 @@ export default class MeasureTool {
           .attr('d', gmPath);
         self._pathAux.selectAll("path")
           .attr('d', gmPath);
-        self._tickPath.selectAll("path")
-          .data(paths);
-        self._updateTicks();
       });
 
     circleDrag.on('start', function(d) {
@@ -399,13 +331,6 @@ export default class MeasureTool {
               y === d.geometry.coordinates[index][1]) {
               point[0] = event.x;
               point[1] = event.y;
-              // prepare for ticks path.
-              self._geometry.updateWayPoints(
-                index,
-                self._projectionUtility.svgPointToLatLng([event.x, event.y]));
-              points = Helper.interpolatePointsOnPath(
-                self._geometry ? self._geometry.pathSegments : [], self._tickLength, true);
-              paths = [(new Path(points)).toJSON()];
             } else {
               point = self._projectionUtility.latLngToSvgPoint([x,y]);
             }
@@ -418,9 +343,6 @@ export default class MeasureTool {
           .attr('d', gmPath);
         this._pathAux.selectAll("path")
           .attr('d', gmPath);
-        self._tickPath.selectAll("path")
-          .data(paths);
-        self._updateTicks();
       });
 
     pathDrag.on('start', d => {
@@ -436,12 +358,6 @@ export default class MeasureTool {
         this._geometry.updateWayPoints(
           this._pointSegment.segmentIndex + 1,
           this._projectionUtility.svgPointToLatLng([event.x, event.y]));
-        let points = Helper.interpolatePointsOnPath(
-          self._geometry ? self._geometry.pathSegments : [], self._tickLength, true);
-        let paths = [(new Path(points)).toJSON()];
-        self._tickPath.selectAll("path")
-          .data(paths);
-        self._updateTicks();
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
@@ -471,11 +387,5 @@ export default class MeasureTool {
 
   _enableMapScroll() {
     this._map.setOptions({ scrollwheel: true, zoomControl: true });
-  }
-
-  _computeTickLength() {
-    let metersPerPixel = 156543.03392 * Math.cos(this._map.getCenter().lat() * Math.PI / 180)
-      / Math.pow(2, this._map.getZoom());
-    this._tickLength = metersPerPixel * 30;
   }
 };
