@@ -110,6 +110,12 @@ export default class MeasureTool {
       .attr('class', 'grey-circle')
       .attr('r', 5);
 
+    this._text = this._svgOverlay
+      .append('g').attr('class', 'measure-text');
+    this._text
+      .selectAll('text')
+      .data(this._geometry ? this._geometry.lines: []);
+
   }
 
   /**
@@ -119,6 +125,7 @@ export default class MeasureTool {
   _onDrawOverlay() {
     this._updateCircles();
     this._updateLine();
+    this._updateText();
   }
 
   _onRemoveOverlay() {
@@ -191,6 +198,7 @@ export default class MeasureTool {
     linesBase
       .enter()
       .append('line')
+      .attr('id', (d, i) => `text_${i}`)
         .attr("class", "base-line")
         .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
@@ -234,6 +242,32 @@ export default class MeasureTool {
         .call(this._onDragLine());
 
     linesAux.exit().remove();
+  }
+
+  _updateText() {
+    let text = this._text.selectAll("text")
+      .data(this._geometry ? this._geometry.lines : [])
+      .enter()
+      .append('text')
+      .style("stroke", "red")
+      .attr('text-anchor', 'middle')
+      .attr('transform', (d, i) => {
+        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        let mid = Helper.findMidPoint([p1, p2]);
+        let angle;
+        if (p1[0] === p2[0]) {
+          if (p2[1] > p1[1]) angle = 90;
+          else if (p2[1] < p1[1]) angle = 270;
+          else angle = 0;
+        } else {
+          angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
+        }
+        return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
+      })
+      .text((d, i) => 12345.12303);
+
+    text.exit().remove();
   }
 
   _onDragCircle() {

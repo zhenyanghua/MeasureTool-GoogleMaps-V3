@@ -10,6 +10,12 @@ export default class Helper {
     ];
   }
 
+  static findMidPoint(segment) {
+    return [
+      (segment[0][0] + segment[1][0]) / 2,
+      (segment[0][1] + segment[1][1]) / 2
+    ];
+  }
   /**
    * Calculate the distance in meters between two points.
    * @param p1
