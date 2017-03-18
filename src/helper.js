@@ -21,9 +21,8 @@ export default class Helper {
    * @param p1
    * @param p2
    * @return {*}
-   * @private
    */
-  static getlengthBetween(p1, p2) {
+  static computelengthBetween(p1, p2) {
     return google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])

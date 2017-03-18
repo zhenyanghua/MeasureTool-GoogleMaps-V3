@@ -249,24 +249,24 @@ export default class MeasureTool {
       .attr('class', 'measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
-      .attr('transform', (d, i) => {
+      .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => 12345.12303);
+      .text((d, i) => Helper.computelengthBetween(d[0], d[1]));
 
     text.enter()
       .append('text')
       .attr('class', 'measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
-      .attr('transform', (d, i) => {
+      .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => 12345.12303);
+      .text((d, i) => Helper.computelengthBetween(d[0], d[1]));
 
     text.exit().remove();
   }
@@ -373,7 +373,8 @@ export default class MeasureTool {
           let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
           return this._doTextTransform(p1, p2);
         })
-        .text((d) => 12345.12303);
+        .text((d, i) => Helper.computelengthBetween(
+          this._projectionUtility.svgPointToLatLng([event.x, event.y]), d[1]));
     }
     if (i > 0) {
       this._text.select(`text:nth-child(${i})`)
@@ -382,7 +383,8 @@ export default class MeasureTool {
           let p2 = [event.x, event.y];
           return this._doTextTransform(p1, p2);
         })
-        .text((d) => 12345.12303);
+        .text((d, i) => Helper.computelengthBetween(
+          d[0], this._projectionUtility.svgPointToLatLng([event.x, event.y])));
     }
   }
 
