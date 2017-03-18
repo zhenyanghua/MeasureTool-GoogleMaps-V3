@@ -10,8 +10,13 @@ import Helper from './helper';
 export default class MeasureTool {
   get version() { return `${Config.prefix}-v${Config.version}`; };
 
-  constructor(map) {
-    this._map = map;
+  constructor(specification) {
+    if (!specification.map) throw new Error("map is required");
+    this._options = {
+      alwaysShowAccumulativeLength: true
+    };
+    Object.assign(this._options, specification);
+    this._map = specification.map;
     this._map.setClickableIcons(false);
     this._init();
   }
@@ -85,12 +90,6 @@ export default class MeasureTool {
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
       .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
-    this._text = this._svgOverlay
-      .append('g').attr('class', 'text-group');
-    this._text
-      .selectAll('text')
-      .data(this._geometry ? this._geometry.lines: []);
-
     this._linesBase = this._svgOverlay
       .append('g').attr('class', 'base');
     this._linesBase
@@ -109,6 +108,18 @@ export default class MeasureTool {
       .selectAll('circle')
       .data(this._geometry ? this._geometry.nodes : []);
 
+    this._nodeText = this._svgOverlay
+      .append('g').attr('class', 'node-text');
+    this._nodeText
+      .selectAll('text')
+      .data(this._geometry ? this._geometry.nodes : []);
+
+    this._segmentText = this._svgOverlay
+      .append('g').attr('class', 'segment-text');
+    this._segmentText
+      .selectAll('text')
+      .data(this._geometry ? this._geometry.lines : []);
+
     this._hoverCircle = this._svgOverlay
       .append('g').attr('class', 'hover-circle');
     this._hoverCircle
@@ -125,7 +136,8 @@ export default class MeasureTool {
   _onDrawOverlay() {
     this._updateCircles();
     this._updateLine();
-    this._updateText();
+    this._updateSegmentText();
+    this._updateNodeText();
   }
 
   _onRemoveOverlay() {
@@ -243,10 +255,10 @@ export default class MeasureTool {
     linesAux.exit().remove();
   }
 
-  _updateText() {
-    let text = this._text.selectAll("text")
+  _updateSegmentText() {
+    let text = this._segmentText.selectAll("text")
       .data(this._geometry ? this._geometry.lines : [])
-      .attr('class', 'measure-text')
+      .attr('class', 'segment-measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('transform', d => {
@@ -254,11 +266,11 @@ export default class MeasureTool {
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => Helper.computelengthBetween(d[0], d[1]));
+      .text((d, i) => Helper.computeLengthBetween(d[0], d[1]));
 
     text.enter()
       .append('text')
-      .attr('class', 'measure-text')
+      .attr('class', 'segment-measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('transform', d => {
@@ -266,7 +278,29 @@ export default class MeasureTool {
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => Helper.computelengthBetween(d[0], d[1]));
+      .text((d, i) => Helper.computeLengthBetween(d[0], d[1]));
+
+    text.exit().remove();
+  }
+
+  _updateNodeText() {
+    let text = this._nodeText.selectAll("text")
+      .data(this._geometry ? this._geometry.nodes : [])
+      .attr('class', 'node-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .text((d, i) => Helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
+
+    text.enter()
+      .append('text')
+      .attr('class', 'node-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .text((d, i) => Helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
 
     text.exit().remove();
   }
@@ -284,7 +318,8 @@ export default class MeasureTool {
           .attr('cy', event.y);
         self._updateLinePosition.call(self, self._linesBase, i);
         self._updateLinePosition.call(self, self._linesAux, i);
-        self._updateTextPosition(i)
+        self._updateSegmentTextPosition(i);
+        self._updateNodeTextPosition(i);
       });
 
     circleDrag.on('start', function(d) {
@@ -320,12 +355,14 @@ export default class MeasureTool {
             i + 1,
             this._projectionUtility.svgPointToLatLng([event.x, event.y]));
           this._updateLine();
-          this._updateText();
+          this._updateSegmentText();
+          this._updateNodeText();
         }
         this._updateHoverCirclePosition(event.x, event.y);
         this._updateLinePosition(this._linesBase, i + 1);
         this._updateLinePosition(this._linesAux, i + 1);
-        this._updateTextPosition(i + 1)
+        this._updateSegmentTextPosition(i + 1);
+        this._updateNodeTextPosition(i + 1);
       });
 
     lineDrag.on('start', () => {
@@ -365,27 +402,41 @@ export default class MeasureTool {
     }
   }
 
-  _updateTextPosition(i) {
-    if (i < this._geometry.lines.length) {
-      this._text.select(`text:nth-child(${i + 1})`)
+  _updateSegmentTextPosition(index) {
+    if (index < this._geometry.lines.length) {
+      this._segmentText.select(`text:nth-child(${index + 1})`)
         .attr('transform', d => {
           let p1 = [event.x, event.y];
           let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
           return this._doTextTransform(p1, p2);
         })
-        .text((d, i) => Helper.computelengthBetween(
+        .text(d => Helper.computeLengthBetween(
           this._projectionUtility.svgPointToLatLng([event.x, event.y]), d[1]));
     }
-    if (i > 0) {
-      this._text.select(`text:nth-child(${i})`)
+    if (index > 0) {
+      this._segmentText.select(`text:nth-child(${index})`)
         .attr('transform', d => {
           let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
           let p2 = [event.x, event.y];
           return this._doTextTransform(p1, p2);
         })
-        .text((d, i) => Helper.computelengthBetween(
+        .text(d => Helper.computeLengthBetween(
           d[0], this._projectionUtility.svgPointToLatLng([event.x, event.y])));
     }
+  }
+
+  _updateNodeTextPosition(index) {
+    this._nodeText.select(`text:nth-child(${index + 1})`)
+      .attr('x', event.x)
+      .attr('y', event.y);
+    let followingNodes = this._nodeText.selectAll('text')
+      .filter((d, i) => i >= index);
+    followingNodes
+      .text((d, i) => Helper.computePathLength([
+        ...this._geometry.nodes.slice(0, index),
+        this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+        ...this._geometry.nodes.slice(index + 1, index + 1 + i)
+      ]));
   }
 
   _doTextTransform(p1, p2) {

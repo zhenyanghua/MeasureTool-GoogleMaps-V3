@@ -31,7 +31,17 @@
   stroke-width: 8px;
 }
 
-.measure-text {
+.segment-measure-text {
   stroke: black;
+  pointer-events: none;
+}
+
+.node-measure-text {
+  fill: red;
+  stroke: white;
+  stroke-width: 0.2px;
+  font-family: 'Roboto',Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 900;
   pointer-events: none;
 }

@@ -22,11 +22,22 @@ export default class Helper {
    * @param p2
    * @return {*}
    */
-  static computelengthBetween(p1, p2) {
+  static computeLengthBetween(p1, p2) {
     return google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])
     );
+  }
+
+  static computePathLength(points) {
+    let sum = 0;
+    for (let i = 1; i < points.length; i++) {
+      sum += google.maps.geometry.spherical.computeDistanceBetween(
+        new google.maps.LatLng(points[i - 1][1], points[i - 1][0]),
+        new google.maps.LatLng(points[i][1], points[i][0])
+      );
+    }
+    return sum;
   }
 
   /**
