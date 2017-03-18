@@ -85,6 +85,12 @@ export default class MeasureTool {
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
       .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
+    this._text = this._svgOverlay
+      .append('g').attr('class', 'text-group');
+    this._text
+      .selectAll('text')
+      .data(this._geometry ? this._geometry.lines: []);
+
     this._linesBase = this._svgOverlay
       .append('g').attr('class', 'base');
     this._linesBase
@@ -109,12 +115,6 @@ export default class MeasureTool {
       .append("circle")
       .attr('class', 'grey-circle')
       .attr('r', 5);
-
-    this._text = this._svgOverlay
-      .append('g').attr('class', 'measure-text');
-    this._text
-      .selectAll('text')
-      .data(this._geometry ? this._geometry.lines: []);
 
   }
 
@@ -198,7 +198,6 @@ export default class MeasureTool {
     linesBase
       .enter()
       .append('line')
-      .attr('id', (d, i) => `text_${i}`)
         .attr("class", "base-line")
         .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
@@ -247,23 +246,25 @@ export default class MeasureTool {
   _updateText() {
     let text = this._text.selectAll("text")
       .data(this._geometry ? this._geometry.lines : [])
-      .enter()
-      .append('text')
-      .style("stroke", "red")
+      .attr('class', 'measure-text')
       .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
       .attr('transform', (d, i) => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
-        let mid = Helper.findMidPoint([p1, p2]);
-        let angle;
-        if (p1[0] === p2[0]) {
-          if (p2[1] > p1[1]) angle = 90;
-          else if (p2[1] < p1[1]) angle = 270;
-          else angle = 0;
-        } else {
-          angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
-        }
-        return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
+        return this._doTextTransform(p1, p2);
+      })
+      .text((d, i) => 12345.12303);
+
+    text.enter()
+      .append('text')
+      .attr('class', 'measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('transform', (d, i) => {
+        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        return this._doTextTransform(p1, p2);
       })
       .text((d, i) => 12345.12303);
 
@@ -283,6 +284,7 @@ export default class MeasureTool {
           .attr('cy', event.y);
         self._updateLinePosition.call(self, self._linesBase, i);
         self._updateLinePosition.call(self, self._linesAux, i);
+        self._updateTextPosition(i)
       });
 
     circleDrag.on('start', function(d) {
@@ -318,10 +320,12 @@ export default class MeasureTool {
             i + 1,
             this._projectionUtility.svgPointToLatLng([event.x, event.y]));
           this._updateLine();
+          this._updateText();
         }
         this._updateHoverCirclePosition(event.x, event.y);
         this._updateLinePosition(this._linesBase, i + 1);
         this._updateLinePosition(this._linesAux, i + 1);
+        this._updateTextPosition(i + 1)
       });
 
     lineDrag.on('start', () => {
@@ -359,6 +363,40 @@ export default class MeasureTool {
         .attr('x2', event.x)
         .attr('y2', event.y);
     }
+  }
+
+  _updateTextPosition(i) {
+    if (i < this._geometry.lines.length) {
+      this._text.select(`text:nth-child(${i + 1})`)
+        .attr('transform', d => {
+          let p1 = [event.x, event.y];
+          let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+          return this._doTextTransform(p1, p2);
+        })
+        .text((d) => 12345.12303);
+    }
+    if (i > 0) {
+      this._text.select(`text:nth-child(${i})`)
+        .attr('transform', d => {
+          let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+          let p2 = [event.x, event.y];
+          return this._doTextTransform(p1, p2);
+        })
+        .text((d) => 12345.12303);
+    }
+  }
+
+  _doTextTransform(p1, p2) {
+      let mid = Helper.findMidPoint([p1, p2]);
+      let angle;
+      if (p1[0] === p2[0]) {
+        if (p2[1] > p1[1]) angle = 90;
+        else if (p2[1] < p1[1]) angle = 270;
+        else angle = 0;
+      } else {
+        angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
+      }
+      return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
   }
 
   _updateHoverCirclePosition(x, y) {
