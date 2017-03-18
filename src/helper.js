@@ -1,4 +1,22 @@
 export default class Helper {
+  constructor(specification) {
+    this._options = {
+      unit: 'metric'
+    };
+    Object.assign(this._options, specification);
+    this.init()
+  }
+
+  init() {
+    switch (this._options.unit) {
+      case 'metric':
+        this._lengthMultiplier = 1;
+        break;
+      case 'imperial':
+        this._lengthMultiplier = 1 / 1609.344;
+    }
+  }
+
   static findTouchPoint(segment, point) {
     const k = ((segment[1][1] - segment[0][1]) * (point[0] - segment[0][0]) -
                (segment[1][0] - segment[0][0]) * (point[1] - segment[0][1])) /
@@ -22,14 +40,14 @@ export default class Helper {
    * @param p2
    * @return {*}
    */
-  static computeLengthBetween(p1, p2) {
+  computeLengthBetween(p1, p2) {
     return google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])
-    );
+    ) * this._lengthMultiplier;
   }
 
-  static computePathLength(points) {
+  computePathLength(points) {
     let sum = 0;
     for (let i = 1; i < points.length; i++) {
       sum += google.maps.geometry.spherical.computeDistanceBetween(
@@ -37,7 +55,7 @@ export default class Helper {
         new google.maps.LatLng(points[i][1], points[i][0])
       );
     }
-    return sum;
+    return sum * this._lengthMultiplier;
   }
 
   /**

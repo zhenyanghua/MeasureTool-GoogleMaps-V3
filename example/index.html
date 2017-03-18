@@ -29,7 +29,12 @@
       zoom: 8,
       scaleControl: true
     });
-    var measureTool = new MeasureTool({map: map});
+    var measureTool = new MeasureTool({
+      map: map,
+      showSegmentLength: true,
+      showAccumulativeLength: true,
+      unit: 'metric' // metric or imperial
+    });
     console.log(measureTool.version);
   }
 </script>

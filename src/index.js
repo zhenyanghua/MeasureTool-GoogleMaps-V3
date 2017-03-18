@@ -13,7 +13,9 @@ export default class MeasureTool {
   constructor(specification) {
     if (!specification.map) throw new Error("map is required");
     this._options = {
-      alwaysShowAccumulativeLength: true
+      showSegmentLength: true,
+      showAccumulativeLength: true,
+      unit: 'metric' // or 'imperial'
     };
     Object.assign(this._options, specification);
     this._map = specification.map;
@@ -25,7 +27,10 @@ export default class MeasureTool {
     this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
     this._startElementNode = this._contextMenu.addItem("Measure distance", true, this._startMeasure, this);
     this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this._endMeasure, this);
-    
+
+    this._helper = new Helper({
+      unit: this._options.unit
+    });
     this._overlay = new google.maps.OverlayView();
     this._setOverlay();
     this._bindToggleContextMenu();
@@ -266,7 +271,7 @@ export default class MeasureTool {
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => Helper.computeLengthBetween(d[0], d[1]));
+      .text((d, i) => this._helper.computeLengthBetween(d[0], d[1]));
 
     text.enter()
       .append('text')
@@ -278,7 +283,7 @@ export default class MeasureTool {
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
         return this._doTextTransform(p1, p2);
       })
-      .text((d, i) => Helper.computeLengthBetween(d[0], d[1]));
+      .text((d, i) => this._helper.computeLengthBetween(d[0], d[1]));
 
     text.exit().remove();
   }
@@ -291,7 +296,7 @@ export default class MeasureTool {
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
       .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .text((d, i) => Helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
+      .text((d, i) => this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
 
     text.enter()
       .append('text')
@@ -300,7 +305,7 @@ export default class MeasureTool {
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
       .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .text((d, i) => Helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
+      .text((d, i) => this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
 
     text.exit().remove();
   }
@@ -410,7 +415,7 @@ export default class MeasureTool {
           let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
           return this._doTextTransform(p1, p2);
         })
-        .text(d => Helper.computeLengthBetween(
+        .text(d => this._helper.computeLengthBetween(
           this._projectionUtility.svgPointToLatLng([event.x, event.y]), d[1]));
     }
     if (index > 0) {
@@ -420,7 +425,7 @@ export default class MeasureTool {
           let p2 = [event.x, event.y];
           return this._doTextTransform(p1, p2);
         })
-        .text(d => Helper.computeLengthBetween(
+        .text(d => this._helper.computeLengthBetween(
           d[0], this._projectionUtility.svgPointToLatLng([event.x, event.y])));
     }
   }
@@ -432,7 +437,7 @@ export default class MeasureTool {
     let followingNodes = this._nodeText.selectAll('text')
       .filter((d, i) => i >= index);
     followingNodes
-      .text((d, i) => Helper.computePathLength([
+      .text((d, i) => this._helper.computePathLength([
         ...this._geometry.nodes.slice(0, index),
         this._projectionUtility.svgPointToLatLng([event.x, event.y]),
         ...this._geometry.nodes.slice(index + 1, index + 1 + i)
