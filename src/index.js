@@ -171,7 +171,7 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(this._nodeCircles.selectAll('circle[r="6"]') == 0 &&
+    if(this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addNode(latLng);
@@ -468,6 +468,16 @@ export default class MeasureTool {
           offset = -7;
         }
         return event.y + offset;
+      });
+    this._nodeText.select(`text:nth-child(${index + 2})`)
+      .attr('y', d => {
+        let offset;
+        if (index + 1 > 0 && event.y < this._projectionUtility.latLngToSvgPoint(d)[1]) {
+          offset = 23;
+        } else {
+          offset = -7;
+        }
+        return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
       });
     let followingNodes = this._nodeText.selectAll('text')
       .filter((d, i) => i >= index);
