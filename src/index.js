@@ -63,8 +63,8 @@ export default class MeasureTool {
     this._checkClick(this._firstClick);
     this._contextMenu.toggleItems([this._endElementNode], [this._startElementNode]);
 
-    this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
-    this._map.addListener('zoom_changed', () => this._redrawOverlay());
+    this._mapClickEvent = this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
+    this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
     this._map.setOptions({draggableCursor: 'default'});
   }
 
@@ -72,8 +72,9 @@ export default class MeasureTool {
     console.log("end measure");
     this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
 
-    google.maps.event.clearListeners(this._map, 'click');
-    google.maps.event.clearListeners(this._map, 'zoom_changed');
+    this._mapClickEvent.remove();
+    this._mapZoomChangedEvent.remove();
+
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
@@ -170,7 +171,7 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(this._nodeCircles.selectAll('circle[r="7"]').size() == 0 &&
+    if(this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addNode(latLng);
@@ -303,7 +304,7 @@ export default class MeasureTool {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .attr('y', this._transformNodeTextY.bind(this))
       .text((d, i) => this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
 
     text.enter()
@@ -312,7 +313,7 @@ export default class MeasureTool {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('y', d => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .attr('y', this._transformNodeTextY.bind(this))
       .text((d, i) => this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1)));
 
     text.exit().remove();
@@ -341,15 +342,17 @@ export default class MeasureTool {
 
     circleDrag.on('start', function(d) {
       event.sourceEvent.stopPropagation();
-      select(this).raise().attr('r', 7);
+      select(this).raise().attr('r', 6);
       self._disableMapScroll();
     });
 
     circleDrag.on('end', function (d, i) {
       self._enableMapScroll();
       if (!isDragged) {
-        self._geometry.removeNode(i);
-        select(this).classed('removed-circle', true);
+        if (i > 0) {
+          self._geometry.removeNode(i);
+          select(this).classed('removed-circle', true);
+        }
       } else {
         self._geometry.updateNode(
           i,
@@ -453,7 +456,16 @@ export default class MeasureTool {
   _updateNodeTextPosition(index) {
     this._nodeText.select(`text:nth-child(${index + 1})`)
       .attr('x', event.x)
-      .attr('y', event.y);
+      .attr('y', () => {
+        let offset;
+        if (index > 0 && this._projectionUtility.latLngToSvgPoint(
+          this._geometry.nodes[index - 1])[1] < event.y) {
+          offset = 23;
+        } else {
+          offset = -7;
+        }
+        return event.y + offset;
+      });
     let followingNodes = this._nodeText.selectAll('text')
       .filter((d, i) => i >= index);
     followingNodes
@@ -495,5 +507,15 @@ export default class MeasureTool {
 
   _enableMapScroll() {
     this._map.setOptions({ scrollwheel: true, zoomControl: true });
+  }
+
+  _transformNodeTextY(d, i) {
+    let offset;
+      if (i > 0 && this._geometry.nodes[i - 1][1] > d[1]) {
+      offset = 23;
+    } else {
+      offset = -7;
+    }
+    return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
   }
 };

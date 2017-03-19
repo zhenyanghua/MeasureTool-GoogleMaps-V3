@@ -36,6 +36,7 @@
       unit: 'metric' // metric or imperial
     });
     console.log(measureTool.version);
+    map.addListener('click', () => console.log('clicked'));
   }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap"
