@@ -12,14 +12,20 @@ export default class Helper {
       case 'metric':
         this._lengthMultiplier = 1;
         this._formatLength = this._formatLengthMetric;
+        this._areaMultiplier = 1;
+        this._formatArea = this._formatAreaMetric;
         break;
       case 'imperial':
-        this._lengthMultiplier = 1 / 1609.344;
+        this._lengthMultiplier = 3.28084;
         this._formatLength = this._formatLengthImperial;
+        this._areaMultiplier = 10.7639;
+        this._formatArea = this._formatAreaImperial;
         break;
       default:
         this._lengthMultiplier = 1;
         this._formatLength = this._formatLengthMetric;
+        this._areaMultiplier = 1;
+        this._formatArea = this._formatAreaMetric;
         break;
     }
   }
@@ -40,6 +46,10 @@ export default class Helper {
       (segment[0][0] + segment[1][0]) / 2,
       (segment[0][1] + segment[1][1]) / 2
     ];
+  }
+
+  static computePixelLength(p1, p2) {
+    return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
   }
   /**
    * Calculate the distance in meters between two points.
@@ -65,6 +75,11 @@ export default class Helper {
     return this._formatLength(sum * this._lengthMultiplier);
   }
 
+  computeArea(points) {
+    return this._formatArea(google.maps.geometry.spherical.computeArea(
+      points.map(p => new google.maps.LatLng(p[1], p[0]))) * this._areaMultiplier);
+  }
+
   _formatLengthMetric(value) {
     let unit;
     if (value / 1000 >= 1) {
@@ -73,7 +88,7 @@ export default class Helper {
     } else {
       unit = 'm';
     }
-    return this._roundUp(value, 2).toLocaleString() + ' ' + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatLengthImperial(value) {
@@ -84,11 +99,37 @@ export default class Helper {
     } else {
       unit = 'ft';
     }
-    return this._roundUp(value, 2).toLocaleString() + ' ' + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaMetric(value) {
+    let unit;
+    if (value / 1000000 >= 1) {
+      unit = 'km²';
+      value /= 1000000;
+    } else {
+      unit = 'm²';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaImperial(value) {
+    let unit;
+    if (value / 3.587e-8 >= 1) {
+      unit = 'mi²';
+      value /= 3.587e-8;
+    } else {
+      unit = 'ft²';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _roundUp(value, decimals) {
     return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals).toFixed(decimals);
+  }
+
+  _numberToLocale(number) {
+    return new Intl.NumberFormat().format(number);
   }
 
   /**

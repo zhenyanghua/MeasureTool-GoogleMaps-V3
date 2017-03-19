@@ -114,20 +114,20 @@ export default class MeasureTool {
       .selectAll('circle')
       .data(this._geometry ? this._geometry.nodes : []);
 
-    if (this._options.showAccumulativeLength) {
-      this._nodeText = this._svgOverlay
-        .append('g').attr('class', 'node-text');
-      this._nodeText
-        .selectAll('text')
-        .data(this._geometry ? this._geometry.nodes : []);
-    }
-
     if (this._options.showSegmentLength) {
       this._segmentText = this._svgOverlay
         .append('g').attr('class', 'segment-text');
       this._segmentText
         .selectAll('text')
         .data(this._geometry ? this._geometry.lines : []);
+    }
+
+    if (this._options.showAccumulativeLength) {
+      this._nodeText = this._svgOverlay
+        .append('g').attr('class', 'node-text');
+      this._nodeText
+        .selectAll('text')
+        .data(this._geometry ? this._geometry.nodes : []);
     }
 
     this._hoverCircle = this._svgOverlay
@@ -300,7 +300,7 @@ export default class MeasureTool {
   _updateNodeText() {
     let text = this._nodeText.selectAll("text")
       .data(this._geometry ? this._geometry.nodes : [])
-      .attr('class', 'node-measure-text')
+      .attr('class', (d, i) => i === 0 ? 'node-measure-text head-text' : 'node-measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
@@ -309,7 +309,7 @@ export default class MeasureTool {
 
     text.enter()
       .append('text')
-      .attr('class', 'node-measure-text')
+      .attr('class', (d, i) => i === 0 ? 'node-measure-text head-text' : 'node-measure-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
       .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
@@ -338,6 +338,7 @@ export default class MeasureTool {
         if (self._options.showAccumulativeLength) {
           self._updateNodeTextPosition(i);
         }
+        self._updateArea(i);
       });
 
     circleDrag.on('start', function(d) {
@@ -362,6 +363,7 @@ export default class MeasureTool {
           self._projectionUtility.svgPointToLatLng([event.x, event.y]));
       }
       isDragged = false;
+      self._updateArea(i);
       self._overlay.draw();
     });
 
@@ -394,6 +396,7 @@ export default class MeasureTool {
         if (this._options.showAccumulativeLength) {
           this._updateNodeTextPosition(i + 1);
         }
+        this._updateArea(i + 1);
       });
 
     lineDrag.on('start', () => {
@@ -462,7 +465,7 @@ export default class MeasureTool {
       .attr('y', () => {
         let offset;
         if (index > 0 && this._projectionUtility.latLngToSvgPoint(
-          this._geometry.nodes[index - 1])[1] < event.y) {
+            this._geometry.nodes[index - 1])[1] < event.y) {
           offset = 23;
         } else {
           offset = -7;
@@ -530,5 +533,41 @@ export default class MeasureTool {
       offset = -7;
     }
     return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
+  }
+
+  _updateArea(i) {
+    const n = this._geometry.nodes.length;
+    const tolerance = 5;
+    let offset, area = 0;
+    if (n > 2) {
+      if (i === 0) {
+        offset = Helper.computePixelLength(
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[n - 1]),
+          [event.x, event.y]);
+        area = offset > tolerance ? 0 : this._helper.computeArea([
+            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            ...this._geometry.nodes.slice(1, n - 1)
+          ]);
+      } else if (i === n - 1) {
+        offset = Helper.computePixelLength([event.x, event.y],
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[0]));
+        area = offset > tolerance ? 0 : this._helper.computeArea(this._geometry.nodes.slice(0, n - 1));
+      } else if (i > 0 && i < n - 1) {
+        offset = Helper.computePixelLength(
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[0]),
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[n - 1]));
+        area = offset > tolerance ? 0 : this._helper.computeArea([
+            ...this._geometry.nodes.slice(0, i),
+            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            ...this._geometry.nodes.slice(i + 1)
+          ]);
+      } else {
+        offset = Helper.computePixelLength(
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[0]),
+          this._projectionUtility.latLngToSvgPoint(this._geometry.nodes[n - 1]));
+        area = offset > tolerance ? 0 : this._helper.computeArea(this._geometry.nodes);
+      }
+    }
+    console.log(area);
   }
 };

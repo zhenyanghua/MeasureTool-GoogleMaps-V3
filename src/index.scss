@@ -1,3 +1,5 @@
+$opaque-white: rgba(255, 255, 255, 0.4);
+
 .measure-tool-svg-overlay{
   position: absolute;
   top: -4000px;
@@ -37,9 +39,17 @@
 }
 
 .node-measure-text {
-  fill: black;
-  stroke: white;
-  stroke-width: 0.5px;
-  font-weight: 900;
+  text-shadow: -1.4px -1.4px $opaque-white,
+               -1.4px 1.4px $opaque-white,
+                1.4px 1.4px $opaque-white,
+                1.4px -1.4px $opaque-white,
+                -1.4px 0 $opaque-white,
+                0 1.4px $opaque-white,
+                1.4px 0 $opaque-white,
+                0 -1.4px $opaque-white;
   pointer-events: none;
+
+  &.head-text {
+    visibility: hidden;
+  }
 }
