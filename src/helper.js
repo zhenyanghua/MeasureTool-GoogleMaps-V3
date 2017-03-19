@@ -8,12 +8,16 @@ export default class Helper {
   }
 
   init() {
-    switch (this._options.unit) {
+    switch (this._options.unit.toLowerCase()) {
       case 'metric':
         this._lengthMultiplier = 1;
         break;
       case 'imperial':
         this._lengthMultiplier = 1 / 1609.344;
+        break;
+      default:
+        this._lengthMultiplier = 1;
+        break;
     }
   }
 

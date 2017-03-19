@@ -113,17 +113,21 @@ export default class MeasureTool {
       .selectAll('circle')
       .data(this._geometry ? this._geometry.nodes : []);
 
-    this._nodeText = this._svgOverlay
-      .append('g').attr('class', 'node-text');
-    this._nodeText
-      .selectAll('text')
-      .data(this._geometry ? this._geometry.nodes : []);
+    if (this._options.showAccumulativeLength) {
+      this._nodeText = this._svgOverlay
+        .append('g').attr('class', 'node-text');
+      this._nodeText
+        .selectAll('text')
+        .data(this._geometry ? this._geometry.nodes : []);
+    }
 
-    this._segmentText = this._svgOverlay
-      .append('g').attr('class', 'segment-text');
-    this._segmentText
-      .selectAll('text')
-      .data(this._geometry ? this._geometry.lines : []);
+    if (this._options.showSegmentLength) {
+      this._segmentText = this._svgOverlay
+        .append('g').attr('class', 'segment-text');
+      this._segmentText
+        .selectAll('text')
+        .data(this._geometry ? this._geometry.lines : []);
+    }
 
     this._hoverCircle = this._svgOverlay
       .append('g').attr('class', 'hover-circle');
@@ -141,8 +145,12 @@ export default class MeasureTool {
   _onDrawOverlay() {
     this._updateCircles();
     this._updateLine();
-    this._updateSegmentText();
-    this._updateNodeText();
+    if (this._options.showSegmentLength) {
+      this._updateSegmentText();
+    }
+    if (this._options.showAccumulativeLength) {
+      this._updateNodeText();
+    }
   }
 
   _onRemoveOverlay() {
@@ -323,8 +331,12 @@ export default class MeasureTool {
           .attr('cy', event.y);
         self._updateLinePosition.call(self, self._linesBase, i);
         self._updateLinePosition.call(self, self._linesAux, i);
-        self._updateSegmentTextPosition(i);
-        self._updateNodeTextPosition(i);
+        if (self._options.showSegmentLength) {
+          self._updateSegmentTextPosition(i);
+        }
+        if (self._options.showAccumulativeLength) {
+          self._updateNodeTextPosition(i);
+        }
       });
 
     circleDrag.on('start', function(d) {
@@ -360,14 +372,22 @@ export default class MeasureTool {
             i + 1,
             this._projectionUtility.svgPointToLatLng([event.x, event.y]));
           this._updateLine();
-          this._updateSegmentText();
-          this._updateNodeText();
+          if (this._options.showSegmentLength) {
+            this._updateSegmentText();
+          }
+          if (this._options.showAccumulativeLength) {
+            this._updateNodeText();
+          }
         }
         this._updateHoverCirclePosition(event.x, event.y);
         this._updateLinePosition(this._linesBase, i + 1);
         this._updateLinePosition(this._linesAux, i + 1);
-        this._updateSegmentTextPosition(i + 1);
-        this._updateNodeTextPosition(i + 1);
+        if (this._options.showSegmentLength) {
+          this._updateSegmentTextPosition(i + 1);
+        }
+        if (this._options.showAccumulativeLength) {
+          this._updateNodeTextPosition(i + 1);
+        }
       });
 
     lineDrag.on('start', () => {
