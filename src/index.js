@@ -171,7 +171,7 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
+    if(this._nodeCircles.selectAll('circle[r="6"]') == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addNode(latLng);
@@ -184,7 +184,7 @@ export default class MeasureTool {
     // join with old data
     let circles = this._nodeCircles.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : [])
-        .attr('class', 'cover-circle')
+        .attr('class', (d, i) => i === 0 ? 'cover-circle head-circle' : 'cover-circle')
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
@@ -352,6 +352,9 @@ export default class MeasureTool {
         if (i > 0) {
           self._geometry.removeNode(i);
           select(this).classed('removed-circle', true);
+        } else {
+          self._geometry.addNode(d);
+          self._overlay.draw();
         }
       } else {
         self._geometry.updateNode(
