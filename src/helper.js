@@ -11,12 +11,15 @@ export default class Helper {
     switch (this._options.unit.toLowerCase()) {
       case 'metric':
         this._lengthMultiplier = 1;
+        this._formatLength = this._formatLengthMetric;
         break;
       case 'imperial':
         this._lengthMultiplier = 1 / 1609.344;
+        this._formatLength = this._formatLengthImperial;
         break;
       default:
         this._lengthMultiplier = 1;
+        this._formatLength = this._formatLengthMetric;
         break;
     }
   }
@@ -45,10 +48,10 @@ export default class Helper {
    * @return {*}
    */
   computeLengthBetween(p1, p2) {
-    return google.maps.geometry.spherical.computeDistanceBetween(
+    return this._formatLength(google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])
-    ) * this._lengthMultiplier;
+    ) * this._lengthMultiplier);
   }
 
   computePathLength(points) {
@@ -59,7 +62,33 @@ export default class Helper {
         new google.maps.LatLng(points[i][1], points[i][0])
       );
     }
-    return sum * this._lengthMultiplier;
+    return this._formatLength(sum * this._lengthMultiplier);
+  }
+
+  _formatLengthMetric(value) {
+    let unit;
+    if (value / 1000 >= 1) {
+      unit = 'km';
+      value /= 1000;
+    } else {
+      unit = 'm';
+    }
+    return this._roundUp(value, 2).toLocaleString() + ' ' + unit;
+  }
+
+  _formatLengthImperial(value) {
+    let unit;
+    if (value / 5280 >= 1) {
+      unit = 'mi';
+      value /= 5280;
+    } else {
+      unit = 'ft';
+    }
+    return this._roundUp(value, 2).toLocaleString() + ' ' + unit;
+  }
+
+  _roundUp(value, decimals) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals).toFixed(decimals);
   }
 
   /**
