@@ -5,15 +5,18 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "webpack --env build",
-    "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
+    "dev": "webpack --progress --colors --watch --env dev"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3.git"
   },
   "keywords": [
-    "Google Maps API"
+    "Google Maps API",
+    "measuremnt",
+    "measure distance",
+    "measure area",
+    "measure"
   ],
   "author": "Zhenyang Hua",
   "license": "Apache-2.0",
@@ -32,8 +35,6 @@
     "d3-drag": "^1.0.3",
     "d3-geo": "^1.6.1",
     "d3-selection": "^1.0.4",
-    "eslint": "^3.17.0",
-    "eslint-loader": "^1.6.3",
     "node-sass": "^4.5.0",
     "sass-loader": "^6.0.2",
     "style-loader": "^0.13.2",

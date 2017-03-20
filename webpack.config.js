@@ -32,11 +32,6 @@ var config = {
         exclude: /node_modules/
       },
       {
-        test: /\.js$/,
-        loader: "eslint-loader",
-        exclude: /node_modules/
-      },
-      {
         test: /\.scss$/,
         use: [{
           loader: "style-loader"
