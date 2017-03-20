@@ -22,18 +22,16 @@
 <div id="map"></div>
 <script src="../lib/MeasureTool.js"></script>
 <script>
-  var map;
+  var map, measureTool;
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: -34.397, lng: 150.644},
       zoom: 8,
       scaleControl: true
     });
-    var measureTool = new MeasureTool({
-      map: map,
+    measureTool = new MeasureTool(map, {
       showSegmentLength: true,
-      showAccumulativeLength: true,
-      unit: 'metric' // metric or imperial
+      unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
     });
     console.log(MeasureTool.version);
     map.addListener('click', () => console.log('clicked'));

@@ -1,21 +1,22 @@
+import {UnitTypeId} from './UnitTypeId';
 export default class Helper {
-  constructor(specification) {
+  constructor(options) {
     this._options = {
-      unit: 'metric'
+      unit: UnitTypeId.METRIC
     };
-    Object.assign(this._options, specification);
+    Object.assign(this._options, options);
     this.init()
   }
 
   init() {
     switch (this._options.unit.toLowerCase()) {
-      case 'metric':
+      case UnitTypeId.METRIC:
         this._lengthMultiplier = 1;
         this.formatLength = this._formatLengthMetric;
         this._areaMultiplier = 1;
         this.formatArea = this._formatAreaMetric;
         break;
-      case 'imperial':
+      case UnitTypeId.IMPERIAL:
         this._lengthMultiplier = 3.28084;
         this.formatLength = this._formatLengthImperial;
         this._areaMultiplier = 10.7639;

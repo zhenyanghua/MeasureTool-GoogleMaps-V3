@@ -1,17 +1,46 @@
+$font-family: Roboto, Arial, sans-serif;
 .measure-tool-context-menu {
+  font-family: $font-family;
+  border: 1px solid rgba(0,0,0,0.2);
+  outline: none;
+  position: fixed;
+
+  box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+  transform: translate3d(0,0,0);
+  max-width: 265px;
+  z-index: 1;
+  outline-offset: -2px;
+
+  background: #fff;
+  padding: 6px 0;
+  white-space: nowrap;
+  cursor: default;
+  margin: 0;
   ul {
     padding: 0px;
     margin: 0px;
-    border: 1px solid grey;
     background-color: white;
 
     li {
-      padding: 3px 10px;
       cursor: pointer;
-      background-color: white;
+      display: flex;
+      align-items: center;
+      border-color: transparent;
+      border-style: dotted;
+      border-width: 1px 0;
+      color: #333;
+      font-size: 13px;
+      font-weight: normal;
+      margin: 0;
+      padding: 4px 44px 4px 16px;
+      position: relative;
+      white-space: nowrap;
 
       &:hover {
-        background-color: azure;
+        background-color: #f1f1f1;
+        border-color: #f1f1f1;
+        color: #222;
+        transition: background 0s;
       }
     }
   }

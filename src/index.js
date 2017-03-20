@@ -6,6 +6,7 @@ import ProjectionUtility from './projection-utility';
 import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
+import {UnitTypeId} from './UnitTypeId';
 
 export default class MeasureTool {
   static get version() { return `${Config.prefix}-v${Config.version}`; };
@@ -14,15 +15,16 @@ export default class MeasureTool {
   get length() { return this._length || 0; };
   get area() { return this._area || 0; };
 
-  constructor(specification) {
-    if (!specification.map) throw new Error("map is required");
+  static get UnitTypeId() { return UnitTypeId};
+
+  constructor(map, options) {
     this._options = {
       showSegmentLength: true,
       showAccumulativeLength: true,
-      unit: 'metric' // or 'imperial'
+      unit: UnitTypeId.METRIC
     };
-    Object.assign(this._options, specification);
-    this._map = specification.map;
+    Object.assign(this._options, options);
+    this._map = map;
     this._map.setClickableIcons(false);
     this._init();
   }
@@ -155,7 +157,11 @@ export default class MeasureTool {
     if (this._options.showAccumulativeLength) {
       this._updateNodeText();
     }
-    this._updateArea(this._geometry ? this._geometry.nodes.length - 1 : 0);
+    if (this._geometry) {
+      this._updateArea(this._geometry.nodes.length - 1,
+        this._geometry.nodes[this._geometry.nodes.length - 1]);
+    }
+
   }
 
   _onRemoveOverlay() {
@@ -354,7 +360,7 @@ export default class MeasureTool {
         if (self._options.showAccumulativeLength) {
           self._updateNodeTextPosition(i);
         }
-        self._updateArea(i);
+        self._updateArea(i, self._projectionUtility.svgPointToLatLng([event.x, event.y]));
       });
 
     circleDrag.on('start', function(d) {
@@ -371,7 +377,7 @@ export default class MeasureTool {
           select(this).classed('removed-circle', true);
         } else {
           self._geometry.addNode(d);
-          self._overlay.draw();
+          // self._overlay.draw();
         }
       } else {
         self._geometry.updateNode(
@@ -411,7 +417,7 @@ export default class MeasureTool {
         if (this._options.showAccumulativeLength) {
           this._updateNodeTextPosition(i + 1);
         }
-        this._updateArea(i + 1);
+        this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       });
 
     lineDrag.on('start', () => {
@@ -431,7 +437,7 @@ export default class MeasureTool {
         this._overlay.draw();
         isDragged = false;
       }
-      this._updateArea(i + 1);
+      this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       this._hoverCircle.select("circle")
         .attr('class', "grey-circle");
     });
@@ -557,7 +563,7 @@ export default class MeasureTool {
     return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
   }
 
-  _updateArea(i) {
+  _updateArea(i, pointToCompare) {
     if (!this._geometry) return;
     const n = this._geometry.nodes.length;
     const tolerance = 1 / 80 *  this.length;
@@ -566,16 +572,14 @@ export default class MeasureTool {
       if (i === 0) {
         offset = this._helper.computeLengthBetween(
           this._geometry.nodes[n - 1],
-          this._projectionUtility.svgPointToLatLng([event.x, event.y]));
+          pointToCompare);
         area = offset > tolerance ? 0 : this._helper.computeArea([
-            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            pointToCompare,
             ...this._geometry.nodes.slice(1, n - 1)
           ]);
       } else if (i === n - 1) {
-        let point = event ? this._projectionUtility.svgPointToLatLng([event.x, event.y]) :
-          this._geometry.nodes[i];
         offset = this._helper.computeLengthBetween(
-          point,
+          pointToCompare,
           this._geometry.nodes[0]);
         area = offset > tolerance ? 0 : this._helper.computeArea(this._geometry.nodes.slice(0, n - 1));
       } else if (i > 0 && i < n - 1) {
@@ -584,7 +588,7 @@ export default class MeasureTool {
           this._geometry.nodes[n - 1]);
         area = offset > tolerance ? 0 : this._helper.computeArea([
             ...this._geometry.nodes.slice(0, i),
-            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            pointToCompare,
             ...this._geometry.nodes.slice(i + 1)
           ]);
       } else {
