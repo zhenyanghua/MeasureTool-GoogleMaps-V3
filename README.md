@@ -2,6 +2,10 @@
 
 A handy measurement widget for Google Maps API v3. The functionalities are implemented as close as what current Google Maps offers.
 
+## Demo
+[Visit demo page](http://zhenyanghua.github.io/google-maps/measure-tool/)
+![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
+
 ## Developer Usage
 To create the measurement widget, pass in a `MeasureTool Object Specification`
 ```JavaScript
