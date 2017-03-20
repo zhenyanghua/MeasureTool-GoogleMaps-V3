@@ -11,21 +11,21 @@ export default class Helper {
     switch (this._options.unit.toLowerCase()) {
       case 'metric':
         this._lengthMultiplier = 1;
-        this._formatLength = this._formatLengthMetric;
+        this.formatLength = this._formatLengthMetric;
         this._areaMultiplier = 1;
-        this._formatArea = this._formatAreaMetric;
+        this.formatArea = this._formatAreaMetric;
         break;
       case 'imperial':
         this._lengthMultiplier = 3.28084;
-        this._formatLength = this._formatLengthImperial;
+        this.formatLength = this._formatLengthImperial;
         this._areaMultiplier = 10.7639;
-        this._formatArea = this._formatAreaImperial;
+        this.formatArea = this._formatAreaImperial;
         break;
       default:
         this._lengthMultiplier = 1;
-        this._formatLength = this._formatLengthMetric;
+        this.formatLength = this._formatLengthMetric;
         this._areaMultiplier = 1;
-        this._formatArea = this._formatAreaMetric;
+        this.formatArea = this._formatAreaMetric;
         break;
     }
   }
@@ -58,10 +58,10 @@ export default class Helper {
    * @return {*}
    */
   computeLengthBetween(p1, p2) {
-    return this._formatLength(google.maps.geometry.spherical.computeDistanceBetween(
+    return google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])
-    ) * this._lengthMultiplier);
+    ) * this._lengthMultiplier;
   }
 
   computePathLength(points) {
@@ -72,12 +72,12 @@ export default class Helper {
         new google.maps.LatLng(points[i][1], points[i][0])
       );
     }
-    return this._formatLength(sum * this._lengthMultiplier);
+    return sum * this._lengthMultiplier;
   }
 
   computeArea(points) {
-    return this._formatArea(google.maps.geometry.spherical.computeArea(
-      points.map(p => new google.maps.LatLng(p[1], p[0]))) * this._areaMultiplier);
+    return google.maps.geometry.spherical.computeArea(
+      points.map(p => new google.maps.LatLng(p[1], p[0]))) * this._areaMultiplier;
   }
 
   _formatLengthMetric(value) {
