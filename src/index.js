@@ -1,18 +1,28 @@
 import css from 'index.scss';
 import {Config} from './config';
 import ContextMenu from './context-menu';
-import {select, selectAll, event} from 'd3-selection';
+import {select, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
-import {geoPath, geoTransform} from 'd3-geo';
-import {Geometry, Path} from 'geometry';
+import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
 
 export default class MeasureTool {
-  get version() { return `${Config.prefix}-v${Config.version}`; };
+  static get version() { return `${Config.prefix}-v${Config.version}`; };
+  get lengthText() { return this._helper.formatLength(this._length || 0); };
+  get areaText() { return this._helper.formatArea(this._area || 0); };
+  get length() { return this._length || 0; };
+  get area() { return this._area || 0; };
 
-  constructor(map) {
-    this._map = map;
+  constructor(specification) {
+    if (!specification.map) throw new Error("map is required");
+    this._options = {
+      showSegmentLength: true,
+      showAccumulativeLength: true,
+      unit: 'metric' // or 'imperial'
+    };
+    Object.assign(this._options, specification);
+    this._map = specification.map;
     this._map.setClickableIcons(false);
     this._init();
   }
@@ -21,7 +31,10 @@ export default class MeasureTool {
     this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
     this._startElementNode = this._contextMenu.addItem("Measure distance", true, this._startMeasure, this);
     this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this._endMeasure, this);
-    
+
+    this._helper = new Helper({
+      unit: this._options.unit
+    });
     this._overlay = new google.maps.OverlayView();
     this._setOverlay();
     this._bindToggleContextMenu();
@@ -54,8 +67,8 @@ export default class MeasureTool {
     this._checkClick(this._firstClick);
     this._contextMenu.toggleItems([this._endElementNode], [this._startElementNode]);
 
-    this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
-    this._map.addListener('zoom_changed', () => this._redrawOverlay());
+    this._mapClickEvent = this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
+    this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
     this._map.setOptions({draggableCursor: 'default'});
   }
 
@@ -63,8 +76,9 @@ export default class MeasureTool {
     console.log("end measure");
     this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
 
-    google.maps.event.clearListeners(this._map, 'click');
-    google.maps.event.clearListeners(this._map, 'zoom_changed');
+    this._mapClickEvent.remove();
+    this._mapZoomChangedEvent.remove();
+
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
@@ -86,17 +100,17 @@ export default class MeasureTool {
       .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
       .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
 
-    this._pathBase = this._svgOverlay
+    this._linesBase = this._svgOverlay
       .append('g').attr('class', 'base');
-    this._pathBase
-      .selectAll("path")
-      .data(this._geometry ? this._geometry.paths : []);
+    this._linesBase
+      .selectAll("line")
+      .data(this._geometry ? this._geometry.lines : []);
 
-    this._pathAux = this._svgOverlay
+    this._linesAux = this._svgOverlay
       .append('g').attr('class', 'aux');
-    this._pathAux
-      .selectAll("path")
-      .data(this._geometry ? this._geometry.paths : []);
+    this._linesAux
+      .selectAll("line")
+      .data(this._geometry ? this._geometry.lines : []);
 
     this._nodeCircles =  this._svgOverlay
       .append('g').attr('class', 'node-circle');
@@ -104,13 +118,28 @@ export default class MeasureTool {
       .selectAll('circle')
       .data(this._geometry ? this._geometry.nodes : []);
 
+    if (this._options.showSegmentLength) {
+      this._segmentText = this._svgOverlay
+        .append('g').attr('class', 'segment-text');
+      this._segmentText
+        .selectAll('text')
+        .data(this._geometry ? this._geometry.lines : []);
+    }
+
+    if (this._options.showAccumulativeLength) {
+      this._nodeText = this._svgOverlay
+        .append('g').attr('class', 'node-text');
+      this._nodeText
+        .selectAll('text')
+        .data(this._geometry ? this._geometry.nodes : []);
+    }
+
     this._hoverCircle = this._svgOverlay
       .append('g').attr('class', 'hover-circle');
     this._hoverCircle
       .append("circle")
       .attr('class', 'grey-circle')
       .attr('r', 5);
-
   }
 
   /**
@@ -118,8 +147,15 @@ export default class MeasureTool {
    * @private
    */
   _onDrawOverlay() {
-    this._updatePath();
     this._updateCircles();
+    this._updateLine();
+    if (this._options.showSegmentLength) {
+      this._updateSegmentText();
+    }
+    if (this._options.showAccumulativeLength) {
+      this._updateNodeText();
+    }
+    this._updateArea(this._geometry ? this._geometry.nodes.length - 1 : 0);
   }
 
   _onRemoveOverlay() {
@@ -139,10 +175,10 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(this._nodeCircles.selectAll('circle[r="7"]').size() == 0 &&
+    if(this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
-      this._geometry.addWayPoints(latLng);
+      this._geometry.addNode(latLng);
       this._overlay.draw();
     }
 
@@ -152,12 +188,10 @@ export default class MeasureTool {
     // join with old data
     let circles = this._nodeCircles.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : [])
-        .attr('class', 'cover-circle')
+        .attr('class', (d, i) => i === 0 ? 'cover-circle head-circle' : 'cover-circle')
         .attr('r', 5)
-        .attr('cx', d => this._projectionUtility
-          .latLngToSvgPoint(d.geometry.coordinates)[0])
-        .attr('cy', d => this._projectionUtility
-          .latLngToSvgPoint(d.geometry.coordinates)[1])
+        .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+        .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
         .on('mouseover', function(d){select(this).attr('r',6)})
         .on('mouseout', function(d){select(this).attr('r',5)})
         .on('touchstart', function(d){select(this).attr('r',6)})
@@ -170,10 +204,8 @@ export default class MeasureTool {
       .append('circle')
         .attr('class', 'cover-circle')
         .attr('r', 5)
-        .attr('cx', d => this._projectionUtility
-          .latLngToSvgPoint(d.geometry.coordinates)[0])
-        .attr('cy', d => this._projectionUtility
-          .latLngToSvgPoint(d.geometry.coordinates)[1])
+        .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+        .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
         .on('mouseover', function(d){select(this).attr('r',6)})
         .on('mouseout', function(d){select(this).attr('r',5)})
         .on('touchstart', function(d){select(this).attr('r',6)})
@@ -183,67 +215,124 @@ export default class MeasureTool {
     this._nodeCircles.selectAll(".removed-circle").remove();
   }
 
-  _updatePath() {
-    // Create a generic transformation,
-    // geoTransform implements the project.stream which can be
-    // used in the geoPath.projection.
-    let self = this;
+  _updateLine() {
+    let linesBase = this._linesBase
+      .selectAll("line")
+      .data(this._geometry ? this._geometry.lines : [])
+        .attr("class", "base-line")
+        .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
+        .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
+        .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
 
-    let gmTransform = geoTransform({
-      point: function (x, y) {
-        let point = self._projectionUtility.latLngToSvgPoint([x,y]);
-        this.stream.point(point[0], point[1]);
-      }
-    });
-    // geoPath uses the projection specified to convert the latlng to
-    // svg path coords.
-    let gmPath = geoPath().projection(gmTransform);
-
-    // Update the one and the only one path with the new data.
-    let pathBase = this._pathBase
-      .selectAll("path")
-      .data(this._geometry ? this._geometry.paths : [])
-        .attr("class", "base-path")
-        .attr('d', gmPath);
-    // There is no new data in the path collection, we just need to
-    // replace the old path data with the new one. so no need to assign
-    // the path styles to nothing. just enter the replacement and seat it.
-    pathBase
+    linesBase
       .enter()
-      .append('path');
+      .append('line')
+        .attr("class", "base-line")
+        .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
+        .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
+        .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
 
-    pathBase.exit().remove();
+    linesBase.exit().remove();
 
-    let pathAux = this._pathAux
-      .selectAll("path")
-      .data(this._geometry ? this._geometry.paths : [])
-      .attr("class", "aux-path")
-      .attr('d', gmPath)
-      .on('mousemove', function(d) {
-        self._pointSegment = Helper.getPointOnPath(
-          [event.offsetX,  event.offsetY],
-          self._pathsSegementsInSvg);
-        let point = self._pointSegment.touchPoint;
-        self._updateHoverCirclePosition(point[0], point[1]);
+    let linesAux = this._linesAux
+      .selectAll("line")
+      .data(this._geometry ? this._geometry.lines : [])
+        .attr("class", "aux-line")
+        .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
+        .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
+        .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+      .on('mousemove', d => {
+        let point = Helper.findTouchPoint(
+          [this._projectionUtility.latLngToSvgPoint(d[0]), this._projectionUtility.latLngToSvgPoint(d[1])],
+          [event.offsetX,  event.offsetY]);
+        this._updateHoverCirclePosition(point[0], point[1]);
       })
-      .on('mouseout', function (d) {
-        self._hideHoverCircle();
-      })
-      .call(self._onDragPath());
+      .on('mouseout', d => this._hideHoverCircle())
+      .call(this._onDragLine());
 
-    pathAux
+    linesAux
       .enter()
-      .append('path');
+      .append('line')
+        .attr("class", "aux-line")
+        .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
+        .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
+        .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+        .on('mousemove', d => {
+          let point = Helper.findTouchPoint(
+            [this._projectionUtility.latLngToSvgPoint(d[0]), this._projectionUtility.latLngToSvgPoint(d[1])],
+            [event.offsetX,  event.offsetY]);
+          this._updateHoverCirclePosition(point[0], point[1]);
+        })
+        .on('mouseout', d => this._hideHoverCircle())
+        .call(this._onDragLine());
 
-    pathAux.exit().remove();
+    linesAux.exit().remove();
+  }
 
-    let pathsSegments = this._geometry ? this._geometry.pathSegments : [];
-    this._pathsSegementsInSvg = pathsSegments.map(segment => {
-      return [
-        this._projectionUtility.latLngToSvgPoint(segment[0]),
-        this._projectionUtility.latLngToSvgPoint(segment[1])
-      ];
-    })
+  _updateSegmentText() {
+    let text = this._segmentText.selectAll("text")
+      .data(this._geometry ? this._geometry.lines : [])
+      .attr('class', 'segment-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('transform', d => {
+        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        return this._doTextTransform(p1, p2);
+      })
+      .text((d, i) => this._helper.formatLength(this._helper.computeLengthBetween(d[0], d[1])));
+
+    text.enter()
+      .append('text')
+      .attr('class', 'segment-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('transform', d => {
+        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        return this._doTextTransform(p1, p2);
+      })
+      .text((d, i) => this._helper.formatLength(this._helper.computeLengthBetween(d[0], d[1])));
+
+    text.exit().remove();
+  }
+
+  _updateNodeText() {
+    let text = this._nodeText.selectAll("text")
+      .data(this._geometry ? this._geometry.nodes : [])
+      .attr('class', (d, i) => i === 0 ? 'node-measure-text head-text' : 'node-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('y', this._transformNodeTextY.bind(this))
+      .text((d, i) => {
+        let len = this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1));
+        if (i === this._geometry.nodes.length - 1) {
+          this._length = len;
+        }
+        return this._helper.formatLength(len);
+      });
+
+    text.enter()
+      .append('text')
+      .attr('class', (d, i) => i === 0 ? 'node-measure-text head-text' : 'node-measure-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'text-after-edge')
+      .attr('x', d => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('y', this._transformNodeTextY.bind(this))
+      .text((d, i) => {
+        let len = this._helper.computePathLength(this._geometry.nodes.slice(0, i + 1));
+        if (i === this._geometry.nodes.length - 1) {
+          this._length = len;
+        }
+        return this._helper.formatLength(len);
+      });
+
+    text.exit().remove();
   }
 
   _onDragCircle() {
@@ -257,44 +346,35 @@ export default class MeasureTool {
         select(this)
           .attr('cx', event.x)
           .attr('cy', event.y);
-
-        let points = [], paths = [];
-        // update path
-        let gmTransform = geoTransform({
-          point: function (x, y) {
-            let point = [];
-            if (x === d.geometry.coordinates[0] &&
-                y === d.geometry.coordinates[1]) {
-              point[0] = event.x;
-              point[1] = event.y;
-            } else {
-              point = self._projectionUtility.latLngToSvgPoint([x,y]);
-            }
-            this.stream.point(point[0], point[1]);
-          }
-        });
-        // geoPath uses the project specified to convert the latlng to
-        // svg path coords.
-        let gmPath = geoPath().projection(gmTransform);
-        self._pathBase.selectAll("path")
-          .attr('d', gmPath);
-        self._pathAux.selectAll("path")
-          .attr('d', gmPath);
+        self._updateLinePosition.call(self, self._linesBase, i);
+        self._updateLinePosition.call(self, self._linesAux, i);
+        if (self._options.showSegmentLength) {
+          self._updateSegmentTextPosition(i);
+        }
+        if (self._options.showAccumulativeLength) {
+          self._updateNodeTextPosition(i);
+        }
+        self._updateArea(i);
       });
 
     circleDrag.on('start', function(d) {
       event.sourceEvent.stopPropagation();
-      select(this).raise().attr('r', 7);
+      select(this).raise().attr('r', 6);
       self._disableMapScroll();
     });
 
     circleDrag.on('end', function (d, i) {
       self._enableMapScroll();
       if (!isDragged) {
-        self._geometry.removeWayPoints(i);
-        select(this).classed('removed-circle', true);
+        if (i > 0) {
+          self._geometry.removeNode(i);
+          select(this).classed('removed-circle', true);
+        } else {
+          self._geometry.addNode(d);
+          self._overlay.draw();
+        }
       } else {
-        self._geometry.updateWayPoints(
+        self._geometry.updateNode(
           i,
           self._projectionUtility.svgPointToLatLng([event.x, event.y]));
       }
@@ -305,68 +385,146 @@ export default class MeasureTool {
     return circleDrag;
   }
 
-  _onDragPath() {
-    let self = this;
+  _onDragLine() {
     let isDragged = false;
-    let pathDrag = drag()
+    let lineDrag = drag()
       .on('drag', (d, i) => {
-        let points = [], paths = [];
         if (!isDragged) {
           isDragged = true;
-          this._geometry.insertWayPoints(
-            this._pointSegment.segmentIndex + 1,
+          this._geometry.insertNode(
+            i + 1,
             this._projectionUtility.svgPointToLatLng([event.x, event.y]));
-
-          this._pathBase.selectAll("path")
-            .data(this._geometry ? this._geometry.paths : []);
-          this._pathAux.selectAll("path")
-            .data(this._geometry ? this._geometry.paths : []);
+          this._updateLine();
+          if (this._options.showSegmentLength) {
+            this._updateSegmentText();
+          }
+          if (this._options.showAccumulativeLength) {
+            this._updateNodeText();
+          }
         }
         this._updateHoverCirclePosition(event.x, event.y);
-        let gmTransform = geoTransform({
-          point: function(x, y) {
-            let point = [];
-            let index = self._pointSegment.segmentIndex + 1;
-            if (x === d.geometry.coordinates[index][0] &&
-              y === d.geometry.coordinates[index][1]) {
-              point[0] = event.x;
-              point[1] = event.y;
-            } else {
-              point = self._projectionUtility.latLngToSvgPoint([x,y]);
-            }
-            this.stream.point(point[0], point[1]);
-          }
-        });
-        let gmPath = geoPath().projection(gmTransform);
-        // update path
-        this._pathBase.selectAll("path")
-          .attr('d', gmPath);
-        this._pathAux.selectAll("path")
-          .attr('d', gmPath);
+        this._updateLinePosition(this._linesBase, i + 1);
+        this._updateLinePosition(this._linesAux, i + 1);
+        if (this._options.showSegmentLength) {
+          this._updateSegmentTextPosition(i + 1);
+        }
+        if (this._options.showAccumulativeLength) {
+          this._updateNodeTextPosition(i + 1);
+        }
+        this._updateArea(i + 1);
       });
 
-    pathDrag.on('start', d => {
+    lineDrag.on('start', () => {
       event.sourceEvent.stopPropagation();
       this._hoverCircle.select("circle")
         .attr('class', "cover-circle");
-      self._disableMapScroll();
+      this._disableMapScroll();
     });
 
-    pathDrag.on('end', d => {
-      self._enableMapScroll();
+    lineDrag.on('end', (d, i) => {
+      this._enableMapScroll();
       if (isDragged) {
-        this._geometry.updateWayPoints(
-          this._pointSegment.segmentIndex + 1,
+        this._geometry.updateNode(
+          i + 1,
           this._projectionUtility.svgPointToLatLng([event.x, event.y]));
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
       }
+      this._updateArea(i + 1);
       this._hoverCircle.select("circle")
         .attr('class', "grey-circle");
     });
 
-    return pathDrag;
+    return lineDrag;
+  }
+
+  _updateLinePosition(group, i) {
+    if (i < this._geometry.lines.length) {
+      group.select(`line:nth-child(${i + 1})`)
+        .attr('x1', event.x)
+        .attr('y1', event.y);
+    }
+    if (i > 0) {
+      group.select(`line:nth-child(${i})`)
+        .attr('x2', event.x)
+        .attr('y2', event.y);
+    }
+  }
+
+  _updateSegmentTextPosition(index) {
+    if (index < this._geometry.lines.length) {
+      this._segmentText.select(`text:nth-child(${index + 1})`)
+        .attr('transform', d => {
+          let p1 = [event.x, event.y];
+          let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+          return this._doTextTransform(p1, p2);
+        })
+        .text(d => this._helper.formatLength(this._helper.computeLengthBetween(
+          this._projectionUtility.svgPointToLatLng([event.x, event.y]), d[1])));
+    }
+    if (index > 0) {
+      this._segmentText.select(`text:nth-child(${index})`)
+        .attr('transform', d => {
+          let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+          let p2 = [event.x, event.y];
+          return this._doTextTransform(p1, p2);
+        })
+        .text(d => this._helper.formatLength(this._helper.computeLengthBetween(
+          d[0], this._projectionUtility.svgPointToLatLng([event.x, event.y]))));
+    }
+  }
+
+  _updateNodeTextPosition(index) {
+    this._nodeText.select(`text:nth-child(${index + 1})`)
+      .attr('x', event.x)
+      .attr('y', () => {
+        let offset;
+        if (index > 0 && this._projectionUtility.latLngToSvgPoint(
+            this._geometry.nodes[index - 1])[1] < event.y) {
+          offset = 23;
+        } else {
+          offset = -7;
+        }
+        return event.y + offset;
+      });
+    this._nodeText.select(`text:nth-child(${index + 2})`)
+      .attr('y', d => {
+        let offset;
+        if (index + 1 > 0 && event.y < this._projectionUtility.latLngToSvgPoint(d)[1]) {
+          offset = 23;
+        } else {
+          offset = -7;
+        }
+        return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
+      });
+    let followingNodes = this._nodeText.selectAll('text')
+      .filter((d, i) => i >= index);
+    followingNodes
+      .text((d, i) => {
+        let len = this._helper.computePathLength([
+          ...this._geometry.nodes.slice(0, index),
+          this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+          ...this._geometry.nodes.slice(index + 1, index + 1 + i)
+        ]);
+        if (index + i === this._geometry.nodes.length - 1) {
+          this._length = len;
+        }
+        return this._helper.formatLength(len);
+      });
+  }
+
+  _doTextTransform(p1, p2) {
+      let mid = Helper.findMidPoint([p1, p2]);
+      let angle;
+      if (p1[0] === p2[0]) {
+        if (p2[1] > p1[1]) angle = 90;
+        else if (p2[1] < p1[1]) angle = 270;
+        else angle = 0;
+      } else {
+        angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
+      }
+      return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
   }
 
   _updateHoverCirclePosition(x, y) {
@@ -387,5 +545,59 @@ export default class MeasureTool {
 
   _enableMapScroll() {
     this._map.setOptions({ scrollwheel: true, zoomControl: true });
+  }
+
+  _transformNodeTextY(d, i) {
+    let offset;
+      if (i > 0 && this._geometry.nodes[i - 1][1] > d[1]) {
+      offset = 23;
+    } else {
+      offset = -7;
+    }
+    return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
+  }
+
+  _updateArea(i) {
+    if (!this._geometry) return;
+    const n = this._geometry.nodes.length;
+    const tolerance = 1 / 80 *  this.length;
+    let offset, area = 0;
+    if (n > 2) {
+      if (i === 0) {
+        offset = this._helper.computeLengthBetween(
+          this._geometry.nodes[n - 1],
+          this._projectionUtility.svgPointToLatLng([event.x, event.y]));
+        area = offset > tolerance ? 0 : this._helper.computeArea([
+            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            ...this._geometry.nodes.slice(1, n - 1)
+          ]);
+      } else if (i === n - 1) {
+        let point = event ? this._projectionUtility.svgPointToLatLng([event.x, event.y]) :
+          this._geometry.nodes[i];
+        offset = this._helper.computeLengthBetween(
+          point,
+          this._geometry.nodes[0]);
+        area = offset > tolerance ? 0 : this._helper.computeArea(this._geometry.nodes.slice(0, n - 1));
+      } else if (i > 0 && i < n - 1) {
+        offset = this._helper.computeLengthBetween(
+          this._geometry.nodes[0],
+          this._geometry.nodes[n - 1]);
+        area = offset > tolerance ? 0 : this._helper.computeArea([
+            ...this._geometry.nodes.slice(0, i),
+            this._projectionUtility.svgPointToLatLng([event.x, event.y]),
+            ...this._geometry.nodes.slice(i + 1)
+          ]);
+      } else {
+        offset = this._helper.computeLengthBetween(
+          this._geometry.nodes[0],
+          this._geometry.nodes[n - 1]);
+        area = offset > tolerance ? 0 : this._helper.computeArea(this._geometry.nodes);
+      }
+    }
+    this._area = area;
+    if (area > 0) {
+      this._nodeText.select(':last-child')
+        .text(`Total distance: ${this.lengthText}; Total area: ${this.areaText}.`);
+    }
   }
 };

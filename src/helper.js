@@ -1,36 +1,36 @@
 export default class Helper {
-  static debounce(cb, deley, context = this) {
-    let timeout = null;
-    let cbArgs = null;
-    const later = () => cb.apply(context, cbArgs);
-
-    return function () {
-      cbArgs = arguments;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, deley);
+  constructor(specification) {
+    this._options = {
+      unit: 'metric'
     };
+    Object.assign(this._options, specification);
+    this.init()
   }
 
-  static getPointOnPath(point, segments) {
-    let minDistance = Infinity, closestPoint = [null, null], segmentIndex;
-    if (segments.length > 0) {
-      for (let i = 0; i < segments.length; i++) {
-        let touchPoint = this._findTouchPoint(segments[i], point);
-        let sqDistance = Math.pow(touchPoint[0] - point[0], 2) + Math.pow(touchPoint[1] - point[1], 2);
-        if (sqDistance < minDistance) {
-          minDistance = sqDistance;
-          closestPoint = touchPoint;
-          segmentIndex = i;
-        }
-      }
+  init() {
+    switch (this._options.unit.toLowerCase()) {
+      case 'metric':
+        this._lengthMultiplier = 1;
+        this.formatLength = this._formatLengthMetric;
+        this._areaMultiplier = 1;
+        this.formatArea = this._formatAreaMetric;
+        break;
+      case 'imperial':
+        this._lengthMultiplier = 3.28084;
+        this.formatLength = this._formatLengthImperial;
+        this._areaMultiplier = 10.7639;
+        this.formatArea = this._formatAreaImperial;
+        break;
+      default:
+        this._lengthMultiplier = 1;
+        this.formatLength = this._formatLengthMetric;
+        this._areaMultiplier = 1;
+        this.formatArea = this._formatAreaMetric;
+        break;
     }
-    return {
-      touchPoint: closestPoint,
-      segmentIndex: segmentIndex
-    };
   }
 
-  static _findTouchPoint(segment, point) {
+  static findTouchPoint(segment, point) {
     const k = ((segment[1][1] - segment[0][1]) * (point[0] - segment[0][0]) -
                (segment[1][0] - segment[0][0]) * (point[1] - segment[0][1])) /
               (Math.pow(segment[1][1] - segment[0][1], 2) +
@@ -41,18 +41,95 @@ export default class Helper {
     ];
   }
 
+  static findMidPoint(segment) {
+    return [
+      (segment[0][0] + segment[1][0]) / 2,
+      (segment[0][1] + segment[1][1]) / 2
+    ];
+  }
+
+  static computePixelLength(p1, p2) {
+    return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+  }
   /**
    * Calculate the distance in meters between two points.
    * @param p1
    * @param p2
    * @return {*}
-   * @private
    */
-  static _getlengthBetween(p1, p2) {
+  computeLengthBetween(p1, p2) {
     return google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0])
-    );
+    ) * this._lengthMultiplier;
+  }
+
+  computePathLength(points) {
+    let sum = 0;
+    for (let i = 1; i < points.length; i++) {
+      sum += google.maps.geometry.spherical.computeDistanceBetween(
+        new google.maps.LatLng(points[i - 1][1], points[i - 1][0]),
+        new google.maps.LatLng(points[i][1], points[i][0])
+      );
+    }
+    return sum * this._lengthMultiplier;
+  }
+
+  computeArea(points) {
+    return google.maps.geometry.spherical.computeArea(
+      points.map(p => new google.maps.LatLng(p[1], p[0]))) * this._areaMultiplier;
+  }
+
+  _formatLengthMetric(value) {
+    let unit;
+    if (value / 1000 >= 1) {
+      unit = 'km';
+      value /= 1000;
+    } else {
+      unit = 'm';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatLengthImperial(value) {
+    let unit;
+    if (value / 5280 >= 1) {
+      unit = 'mi';
+      value /= 5280;
+    } else {
+      unit = 'ft';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaMetric(value) {
+    let unit;
+    if (value / 1000000 >= 1) {
+      unit = 'km²';
+      value /= 1000000;
+    } else {
+      unit = 'm²';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaImperial(value) {
+    let unit;
+    if (value / 3.587e-8 >= 1) {
+      unit = 'mi²';
+      value /= 3.587e-8;
+    } else {
+      unit = 'ft²';
+    }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _roundUp(value, decimals) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals).toFixed(decimals);
+  }
+
+  _numberToLocale(number) {
+    return new Intl.NumberFormat().format(number);
   }
 
   /**
