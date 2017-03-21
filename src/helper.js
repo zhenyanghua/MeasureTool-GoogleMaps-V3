@@ -116,9 +116,9 @@ export default class Helper {
 
   _formatAreaImperial(value) {
     let unit;
-    if (value / 3.587e-8 >= 1) {
+    if (value * 3.587e-8 >= 1) {
       unit = 'mi²';
-      value /= 3.587e-8;
+      value *= 3.587e-8;
     } else {
       unit = 'ft²';
     }
