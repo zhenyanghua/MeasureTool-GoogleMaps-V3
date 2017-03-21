@@ -1,6 +1,6 @@
 {
   "name": "measuretool-googlemaps-v3",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "This is an in-progress handy measurement tool for Google Maps API V3 similar to what Google Maps offers.",
   "main": "lib/index.js",
   "scripts": {
