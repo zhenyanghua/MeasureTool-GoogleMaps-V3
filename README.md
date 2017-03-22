@@ -17,17 +17,12 @@ var measureTool = new MeasureTool(map, {
 ```
 
 ## User Usage
-To start measuring, right click a map and choose measure distance.
-
-To end measuring, right click a map and choose clear measurement.
-
-To add a way point, click on the map.
-
-To remove a way point, click on the waypoint (the first point can not be removed).
-
-To insert a way point, hover on the line and drag it.
-
-When the first point and the last point are close enough, the area will show.
+1. To **start** measuring, *right click* the map and choose **Measure distance**.
+1. *Left click* the map, and the measurement between the two locations will display. Keep clicking to **add** more measurement waypoints.
+1. To **remove** a waypoint, *left click* on the waypoint *(the first point cannot be removed)*.
+1. To **insert** a waypoint on the measurement line, click the line. Waypoints can be moved by *clicking and dragging* them.
+1. When the *first* point and the *last* point are close enough, the **area** will display.
+1. To **end** measuring, *right click* the map and choose **Clear measurement**.
 
 
 ## API
