@@ -21,25 +21,29 @@ export default class MeasureTool {
     this._options = {
       showSegmentLength: true,
       showAccumulativeLength: true,
+      contextMenu: true,
       unit: UnitTypeId.METRIC
     };
     Object.assign(this._options, options);
     this._map = map;
     this._map.setClickableIcons(false);
+    this._id = Helper.makeId(4);
     this._init();
   }
 
   _init() {
-    this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
-    this._startElementNode = this._contextMenu.addItem("Measure distance", true, this._startMeasure, this);
-    this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this._endMeasure, this);
+    if (this._options.contextMenu) {
+      this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
+      this._startElementNode = this._contextMenu.addItem("Measure distance", true, this.start, this);
+      this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this.end, this);
+      this._bindToggleContextMenu();
+    }
 
     this._helper = new Helper({
       unit: this._options.unit
     });
     this._overlay = new google.maps.OverlayView();
     this._setOverlay();
-    this._bindToggleContextMenu();
   }
 
   _bindToggleContextMenu() {
@@ -63,20 +67,32 @@ export default class MeasureTool {
     });
   }
 
-  _startMeasure() {
-    console.log("start measure");
+  /**
+   * start measuring
+   */
+  start() {
+    if (this._started) return;
     this._geometry = new Geometry();
-    this._checkClick(this._firstClick);
-    this._contextMenu.toggleItems([this._endElementNode], [this._startElementNode]);
+
+    if (this._options.contextMenu && this._firstClick) {
+      this._checkClick(this._firstClick);
+      this._contextMenu.toggleItems([this._endElementNode], [this._startElementNode]);
+    }
 
     this._mapClickEvent = this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
     this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
     this._map.setOptions({draggableCursor: 'default'});
+    this._started = true;
   }
 
-  _endMeasure() {
-    console.log("end measure");
-    this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
+  /**
+   * end measuring
+   */
+  end() {
+    if (!this._started) return;
+    if (this._options.contextMenu) {
+      this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
+    }
 
     this._mapClickEvent.remove();
     this._mapZoomChangedEvent.remove();
@@ -85,6 +101,7 @@ export default class MeasureTool {
     this._onRemoveOverlay();
     this._setOverlay();
     this._map.setOptions({draggableCursor: null});
+    this._started = false;
   }
 
   _setOverlay() {
@@ -99,8 +116,10 @@ export default class MeasureTool {
     this._projectionUtility = new ProjectionUtility(this._map.getDiv(), this._projection);
     // Add svg to Pane
     this._svgOverlay = select(this._overlay.getPanes().overlayMouseTarget)
-      .append('div').attr('id', `${Config.prefix}-svg-container`).attr('class',`${Config.prefix}-measure-points`)
-      .append('svg').attr('class',`${Config.prefix}-svg-overlay`);
+      .append('div')
+        .attr('class',`${Config.prefix}-measure-points-${this._id}`)
+      .append('svg')
+        .attr('class',`${Config.prefix}-svg-overlay`);
 
     this._linesBase = this._svgOverlay
       .append('g').attr('class', 'base');
@@ -165,7 +184,7 @@ export default class MeasureTool {
   }
 
   _onRemoveOverlay() {
-    select(`.${Config.prefix}-measure-points`).remove();
+    select(`.${Config.prefix}-measure-points-${this._id}`).remove();
   }
 
   /**
@@ -181,13 +200,13 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
+    if(!this._dragged && this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addNode(latLng);
       this._overlay.draw();
     }
-
+    this._dragged = false;
   }
 
   _updateCircles() {
@@ -377,7 +396,7 @@ export default class MeasureTool {
           select(this).classed('removed-circle', true);
         } else {
           self._geometry.addNode(d);
-          // self._overlay.draw();
+          self._dragged = true;
         }
       } else {
         self._geometry.updateNode(

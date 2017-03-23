@@ -49,8 +49,8 @@ export default class Helper {
     ];
   }
 
-  static computePixelLength(p1, p2) {
-    return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+  static makeId(n) {
+    return (Math.random().toString(36)+'00000000000000000').slice(2, n + 2);
   }
   /**
    * Calculate the distance in meters between two points.
