@@ -224,9 +224,9 @@ export default class MeasureTool {
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d){ self._onOverCircle(d, this);})
+        .on('mouseover', function(d, i){ self._onOverCircle(d, i, this);})
         .on('mouseout', function(d){ self._onOutCircle(d, this);})
-        .on('touchstart', function(d){ self._onOverCircle(d, this);})
+        .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
         .on('touchleave', function(d){ self._onOutCircle(d, this);})
         .on('mousedown', () => this._tooltip.hide())
         .call(this._onDragCircle());
@@ -239,9 +239,9 @@ export default class MeasureTool {
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d){ self._onOverCircle(d, this);})
+        .on('mouseover', function(d, i){ self._onOverCircle(d, i, this);})
         .on('mouseout', function(d){ self._onOutCircle(d, this);})
-        .on('touchstart', function(d){ self._onOverCircle(d, this);})
+        .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
         .on('touchleave', function(d){ self._onOutCircle(d, this);})
         .on('mousedown', () => this._tooltip.hide())
         .call(this._onDragCircle());
@@ -371,10 +371,11 @@ export default class MeasureTool {
     text.exit().remove();
   }
 
-  _onOverCircle(d, target) {
+  _onOverCircle(d, i, target) {
     if (this._dragging) return;
     select(target).attr('r', 6);
-    this._tooltip.show(this._projectionUtility.latLngToContainerPoint(d), Config.tooltipText1);
+    this._tooltip.show(this._projectionUtility.latLngToContainerPoint(d),
+      i === 0 ? Config.tooltipText2 : Config.tooltipText1);
   }
 
   _onOutCircle(d, target) {
@@ -425,7 +426,7 @@ export default class MeasureTool {
         self._geometry.updateNode(
           i,
           self._projectionUtility.svgPointToLatLng([event.x, event.y]));
-        self._showTooltipOnEvent(Config.tooltipText1);
+        self._showTooltipOnEvent(i === 0 ? Config.tooltipText2 : Config.tooltipText1);
       }
       isDragged = false;
       self._dragging = false;
