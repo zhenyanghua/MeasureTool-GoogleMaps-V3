@@ -1,6 +1,7 @@
 import css from 'index.scss';
 import {Config} from './config';
 import ContextMenu from './context-menu';
+import Tooltip from './tooltip';
 import {select, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
 import {Geometry} from 'geometry';
@@ -22,6 +23,7 @@ export default class MeasureTool {
       showSegmentLength: true,
       showAccumulativeLength: true,
       contextMenu: true,
+      tooltip: true,
       unit: UnitTypeId.METRIC
     };
     Object.assign(this._options, options);
@@ -37,6 +39,10 @@ export default class MeasureTool {
       this._startElementNode = this._contextMenu.addItem("Measure distance", true, this.start, this);
       this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this.end, this);
       this._bindToggleContextMenu();
+    }
+
+    if (this._options.tooltip) {
+      this._tooltip = new Tooltip(this._map.getDiv());
     }
 
     this._helper = new Helper({
@@ -210,6 +216,7 @@ export default class MeasureTool {
   }
 
   _updateCircles() {
+    let self = this;
     // join with old data
     let circles = this._nodeCircles.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : [])
@@ -217,10 +224,11 @@ export default class MeasureTool {
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d){select(this).attr('r',6)})
-        .on('mouseout', function(d){select(this).attr('r',5)})
-        .on('touchstart', function(d){select(this).attr('r',6)})
-        .on('touchleave', function(d){select(this).attr('r',5)})
+        .on('mouseover', function(d){ self._onOverCircle(d, this);})
+        .on('mouseout', function(d){ self._onOutCircle(d, this);})
+        .on('touchstart', function(d){ self._onOverCircle(d, this);})
+        .on('touchleave', function(d){ self._onOutCircle(d, this);})
+        .on('mousedown', () => this._tooltip.hide())
         .call(this._onDragCircle());
 
     // enter and seat the new data with same style.
@@ -231,10 +239,11 @@ export default class MeasureTool {
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d){select(this).attr('r',6)})
-        .on('mouseout', function(d){select(this).attr('r',5)})
-        .on('touchstart', function(d){select(this).attr('r',6)})
-        .on('touchleave', function(d){select(this).attr('r',5)})
+        .on('mouseover', function(d){ self._onOverCircle(d, this);})
+        .on('mouseout', function(d){ self._onOutCircle(d, this);})
+        .on('touchstart', function(d){ self._onOverCircle(d, this);})
+        .on('touchleave', function(d){ self._onOutCircle(d, this);})
+        .on('mousedown', () => this._tooltip.hide())
         .call(this._onDragCircle());
 
     this._nodeCircles.selectAll(".removed-circle").remove();
@@ -276,6 +285,7 @@ export default class MeasureTool {
         this._updateHoverCirclePosition(point[0], point[1]);
       })
       .on('mouseout', d => this._hideHoverCircle())
+      .on('mousedown', () => this._tooltip.hide())
       .call(this._onDragLine());
 
     linesAux
@@ -293,6 +303,7 @@ export default class MeasureTool {
           this._updateHoverCirclePosition(point[0], point[1]);
         })
         .on('mouseout', d => this._hideHoverCircle())
+        .on('mousedown', () => this._tooltip.hide())
         .call(this._onDragLine());
 
     linesAux.exit().remove();
@@ -360,6 +371,17 @@ export default class MeasureTool {
     text.exit().remove();
   }
 
+  _onOverCircle(d, target) {
+    if (this._dragging) return;
+    select(target).attr('r', 6);
+    this._tooltip.show(this._projectionUtility.latLngToContainerPoint(d), Config.tooltipText1);
+  }
+
+  _onOutCircle(d, target) {
+    select(target).attr('r', 5);
+    this._tooltip.hide();
+  }
+
   _onDragCircle() {
     let self = this;
     let isDragged = false;
@@ -367,6 +389,7 @@ export default class MeasureTool {
     let circleDrag = drag()
       .on('drag', function (d, i) {
         isDragged = true;
+        self._dragging = true;
 
         select(this)
           .attr('cx', event.x)
@@ -402,8 +425,10 @@ export default class MeasureTool {
         self._geometry.updateNode(
           i,
           self._projectionUtility.svgPointToLatLng([event.x, event.y]));
+        self._showTooltipOnEvent(Config.tooltipText1);
       }
       isDragged = false;
+      self._dragging = false;
       self._overlay.draw();
     });
 
@@ -414,6 +439,7 @@ export default class MeasureTool {
     let isDragged = false;
     let lineDrag = drag()
       .on('drag', (d, i) => {
+        this._dragging = true;
         if (!isDragged) {
           isDragged = true;
           this._geometry.insertNode(
@@ -455,10 +481,12 @@ export default class MeasureTool {
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
+        this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), Config.tooltipText1);
       }
       this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       this._hoverCircle.select("circle")
         .attr('class', "grey-circle");
+      this._dragging = false;
     });
 
     return lineDrag;
@@ -556,12 +584,15 @@ export default class MeasureTool {
     this._hoverCircle.select("circle")
       .attr('cx', x)
       .attr('cy', y);
+    if (this._dragging) return;
+    this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([x, y]), Config.tooltipText2);
   }
 
   _hideHoverCircle() {
     this._hoverCircle.select("circle")
       .attr('cx', null)
       .attr('cy', null);
+    this._tooltip.hide();
   }
 
   _disableMapScroll() {
@@ -622,5 +653,10 @@ export default class MeasureTool {
       this._nodeText.select(':last-child')
         .text(`Total distance: ${this.lengthText}; Total area: ${this.areaText}.`);
     }
+  }
+
+  _showTooltipOnEvent(text) {
+    this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), text);
+    console.log('showing')
   }
 };

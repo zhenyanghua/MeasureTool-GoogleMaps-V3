@@ -21,4 +21,15 @@ export default class ProjectionUtility {
     let coords = this._projection.fromDivPixelToLatLng(svgPoint);
     return [coords.lng(), coords.lat()];
   }
+
+  svgPointToContainerPoint(point) {
+    let svgPoint = this.svgPointToLatLng(point);
+    return this._projection.fromLatLngToContainerPixel(
+      new google.maps.LatLng(svgPoint[1], svgPoint[0]));
+  }
+
+  latLngToContainerPoint(coords) {
+    return this._projection.fromLatLngToContainerPixel(
+      new google.maps.LatLng(coords[1], coords[0]));
+  }
 };
