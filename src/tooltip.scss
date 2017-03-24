@@ -1,0 +1,12 @@
+$font-family: Roboto, Arial, sans-serif;
+.measure-tool-tooltip {
+  font-family: $font-family;
+  margin: 6px 15px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  padding: 10px;
+  overflow: hidden;
+  pointer-events: none;
+  font-size: 0.7rem;
+}
