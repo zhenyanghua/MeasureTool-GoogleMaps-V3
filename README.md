@@ -8,6 +8,11 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 ![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
 
 ## Developer usage
+#### Dependency
+Make sure the **`geometry`** library is referenced in the **Google Maps JavaScript API** loading script.
+```html
+libraries=geometry
+```
 #### Basic use
 To create the measurement widget, pass in a Google Map instance.
 ```javascript
