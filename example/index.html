@@ -14,7 +14,7 @@
     html, body {
       height: 100%;
       margin: 0;
-      padding: 0;
+      padding: 10%;
     }
   </style>
 </head>
@@ -31,6 +31,7 @@
     });
     measureTool = new MeasureTool(map, {
       showSegmentLength: true,
+      tooltip: true,
       unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
     });
   }

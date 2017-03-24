@@ -228,7 +228,7 @@ export default class MeasureTool {
         .on('mouseout', function(d){ self._onOutCircle(d, this);})
         .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
         .on('touchleave', function(d){ self._onOutCircle(d, this);})
-        .on('mousedown', () => this._tooltip.hide())
+        .on('mousedown', () => this._hideTooltip())
         .call(this._onDragCircle());
 
     // enter and seat the new data with same style.
@@ -243,7 +243,7 @@ export default class MeasureTool {
         .on('mouseout', function(d){ self._onOutCircle(d, this);})
         .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
         .on('touchleave', function(d){ self._onOutCircle(d, this);})
-        .on('mousedown', () => this._tooltip.hide())
+        .on('mousedown', () => this._hideTooltip())
         .call(this._onDragCircle());
 
     this._nodeCircles.selectAll(".removed-circle").remove();
@@ -285,7 +285,7 @@ export default class MeasureTool {
         this._updateHoverCirclePosition(point[0], point[1]);
       })
       .on('mouseout', d => this._hideHoverCircle())
-      .on('mousedown', () => this._tooltip.hide())
+      .on('mousedown', () => this._hideTooltip())
       .call(this._onDragLine());
 
     linesAux
@@ -303,7 +303,7 @@ export default class MeasureTool {
           this._updateHoverCirclePosition(point[0], point[1]);
         })
         .on('mouseout', d => this._hideHoverCircle())
-        .on('mousedown', () => this._tooltip.hide())
+        .on('mousedown', () => this._hideTooltip())
         .call(this._onDragLine());
 
     linesAux.exit().remove();
@@ -374,13 +374,15 @@ export default class MeasureTool {
   _onOverCircle(d, i, target) {
     if (this._dragging) return;
     select(target).attr('r', 6);
-    this._tooltip.show(this._projectionUtility.latLngToContainerPoint(d),
-      i === 0 ? Config.tooltipText2 : Config.tooltipText1);
+    if (this._options.tooltip) {
+      this._tooltip.show(this._projectionUtility.latLngToContainerPoint(d),
+        i === 0 ? Config.tooltipText2 : Config.tooltipText1);
+    }
   }
 
   _onOutCircle(d, target) {
     select(target).attr('r', 5);
-    this._tooltip.hide();
+    this._hideTooltip();
   }
 
   _onDragCircle() {
@@ -482,7 +484,7 @@ export default class MeasureTool {
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
-        this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), Config.tooltipText1);
+        this._showTooltipOnEvent(Config.tooltipText1);
       }
       this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       this._hoverCircle.select("circle")
@@ -586,14 +588,16 @@ export default class MeasureTool {
       .attr('cx', x)
       .attr('cy', y);
     if (this._dragging) return;
-    this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([x, y]), Config.tooltipText2);
+    if (this._options.tooltip) {
+      this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([x, y]), Config.tooltipText2);
+    }
   }
 
   _hideHoverCircle() {
     this._hoverCircle.select("circle")
       .attr('cx', null)
       .attr('cy', null);
-    this._tooltip.hide();
+    this._hideTooltip();
   }
 
   _disableMapScroll() {
@@ -657,7 +661,14 @@ export default class MeasureTool {
   }
 
   _showTooltipOnEvent(text) {
-    this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), text);
-    console.log('showing')
+    if (this._options.tooltip) {
+      this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), text);
+    }
+  }
+
+  _hideTooltip() {
+    if (this._options.tooltip) {
+      this._tooltip.hide();
+    }
   }
 };
