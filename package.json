@@ -2,7 +2,7 @@
   "name": "measuretool-googlemaps-v3",
   "version": "0.0.6",
   "description": "A handy measurement widget for Google Maps API v3. The functionalities are implemented as close as to what current Google Maps offers.",
-  "main": "lib/index.js",
+  "main": "lib/MeasureTool.min.js",
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev"
