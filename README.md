@@ -56,8 +56,8 @@ var measureTool = new MeasureTool(map, {
 
 |Methods|Description|
 |-------|-----------|
-|**end()**|Return Value: **None** - starts measuring.|
-|**start()**|Return Value: **None** - ends measuring.|
+|**end()**|Return Value: **None** - ends measuring.|
+|**start()**|Return Value: **None** - starts measuring.|
 
 |Properties|Description|
 |-------|-----------|
