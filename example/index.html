@@ -34,6 +34,16 @@
       tooltip: true,
       unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
     });
+    measureTool.addListener('measure_start', () => {
+      console.log('started');
+      measureTool.removeListener('measure_start')
+    });
+    measureTool.addListener('measure_end', (e) => {
+      console.log('ended', e.result);
+      measureTool.removeListener('measure_end');
+    });
+
+
   }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap"

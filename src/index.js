@@ -8,9 +8,10 @@ import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
+import {EVENT_START, EVENT_END} from './events';
 
 export default class MeasureTool {
-  static get version() { return `${Config.prefix}-v${Config.version}`; };
+
   get lengthText() { return this._helper.formatLength(this._length || 0); };
   get areaText() { return this._helper.formatArea(this._area || 0); };
   get length() { return this._length || 0; };
@@ -30,6 +31,7 @@ export default class MeasureTool {
     this._map = map;
     this._map.setClickableIcons(false);
     this._id = Helper.makeId(4);
+    this._events = new Map();
     this._init();
   }
 
@@ -89,6 +91,10 @@ export default class MeasureTool {
     this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
     this._map.setOptions({draggableCursor: 'default'});
     this._started = true;
+
+    if (typeof this._events.get(EVENT_START) === "function") {
+      this._events.get(EVENT_START)();
+    }
   }
 
   /**
@@ -108,6 +114,34 @@ export default class MeasureTool {
     this._setOverlay();
     this._map.setOptions({draggableCursor: null});
     this._started = false;
+
+    if (typeof this._events.get(EVENT_END) === "function") {
+      this._events.get(EVENT_END)({
+        result: {
+          length: this.length,
+          lengthText: this.lengthText,
+          area: this.area,
+          areaText: this.areaText
+        }
+      });
+    }
+  }
+
+  /**
+   * register an event
+   * @param event - available events: 'measure-start', 'measure-end'
+   * @param cb - callback function
+   */
+  addListener(event, cb) {
+    this._events.set(event, cb);
+  }
+
+  /**
+   * unregister an event
+   * @param event - available events: 'measure-start', 'measure-end'
+   */
+  removeListener(event) {
+    this._events.delete(event);
   }
 
   _setOverlay() {
