@@ -56,24 +56,20 @@ var measureTool = new MeasureTool(map, {
 
 |Methods|Description|
 |-------|-----------|
-|**end()**|Return Value: **None** - starts measuring.|
-|**start()**|Return Value: **None** - ends measuring.|
+|**end()**|Return Value: **None** - ends measuring.|
+|**start()**|Return Value: **None** - starts measuring.|
 
 |Properties|Description|
-|----------|-----------|
+|-------|-----------|
 |**area**|Type: `number` - the total area of the enclosed polygon, the unit is **m²** for `metric` unit and **ft²** for `imperial` unit.|
 |**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
 |**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 |**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
-
-|Events|Description|
-|------|-----------|
-|**measure_start**|Arguments: **None** - This event is fired when the user starts measuring|
-|**measure_end**|Arguments: `MessureEvent` - This event is fired when the user ends measuring|
+|**version**|Type: `string` - the current version number of **`MeasureTool`**|
 
 ### MeasureToolOptions object specification
 |Properties|Description|
-|----------|-----------|
+|-------|-----------|
 |**showSegmentLength**|Type: `boolean` - display segment length along the path. Enabled by default.|
 |**tooltip**|Type: `boolean` - display tooltip when hover the drawing path. Enabled by default.|
 |**unit**|Type: `UnitTypeId` - the unit type to use for the measured length and area. Defaults to `MeasureTool.UnitTypeId.METRIC`.|
@@ -85,16 +81,3 @@ Identifiers for common UnitType. Specify these by value, or by using the constan
 |--------|-----------|
 |**IMPERIAL**|This unit type shows measured length in US foot (ft) and mile (mi), and area in US square foot (ft²) and square mile (mi²).|
 |**METRIC**|This unit type shows measured length in meter (m) and kilometer (km), and area in square meter (m²) and square kilometer (km²).|
-
-### MeasureEvent object specification
-|Properties|Description|
-|----------|-----------|
-|**result**|Type: `MeasureResult` - The result of the measurement.|
-
-### MeasureResult object specification
-|Properties|Description|
-|----------|-----------|
-|**area**|Type: `number` - the total area of the enclosed polygon, the unit is **m²** for `metric` unit and **ft²** for `imperial` unit.|
-|**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
-|**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
-|**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
