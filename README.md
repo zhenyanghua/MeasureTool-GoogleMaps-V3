@@ -68,7 +68,7 @@ var measureTool = new MeasureTool(map, {
 
 |Events|Description|
 |------|-----------|
-|**measure_end**|Arguments: `MessureEvent` - This event is fired when the user ends measuring|
+|**measure_end**|Arguments: `MeasureEvent` - This event is fired when the user ends measuring|
 |**measure_start**|Arguments: **None** - This event is fired when the user starts measuring|
 
 ### MeasureToolOptions object specification
