@@ -78,14 +78,6 @@ var measureTool = new MeasureTool(map, {
 |**tooltip**|Type: `boolean` - display tooltip when hover the drawing path. Enabled by default.|
 |**unit**|Type: `UnitTypeId` - the unit type to use for the measured length and area. Defaults to `MeasureTool.UnitTypeId.METRIC`.|
 
-### UnitTypeId constants
-Identifiers for common UnitType. Specify these by value, or by using the constant's name. For example, `'metric'` or `MeasureTool.UnitTypeId.METRIC`.
-
-|Constant|Description|
-|--------|-----------|
-|**IMPERIAL**|This unit type shows measured length in US foot (ft) and mile (mi), and area in US square foot (ft²) and square mile (mi²).|
-|**METRIC**|This unit type shows measured length in meter (m) and kilometer (km), and area in square meter (m²) and square kilometer (km²).|
-
 ### MeasureEvent object specification
 |Properties|Description|
 |----------|-----------|
@@ -98,3 +90,11 @@ Identifiers for common UnitType. Specify these by value, or by using the constan
 |**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
 |**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 |**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
+
+### UnitTypeId constants
+Identifiers for common UnitType. Specify these by value, or by using the constant's name. For example, `'metric'` or `MeasureTool.UnitTypeId.METRIC`.
+
+|Constant|Description|
+|--------|-----------|
+|**IMPERIAL**|This unit type shows measured length in US foot (ft) and mile (mi), and area in US square foot (ft²) and square mile (mi²).|
+|**METRIC**|This unit type shows measured length in meter (m) and kilometer (km), and area in square meter (m²) and square kilometer (km²).|
