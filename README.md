@@ -56,7 +56,9 @@ var measureTool = new MeasureTool(map, {
 
 |Methods|Description|
 |-------|-----------|
+|**addListener(eventName: `string`, handler:`Function`)**|Return Value: **None** - addes the given listener function to the given event name.|
 |**end()**|Return Value: **None** - ends measuring.|
+|**removeListener(eventName: `string`)**|Return Value: **None** - removes the given listener.|
 |**start()**|Return Value: **None** - starts measuring.|
 
 |Properties|Description|
