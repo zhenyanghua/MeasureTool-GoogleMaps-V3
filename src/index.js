@@ -8,7 +8,7 @@ import {Geometry} from 'geometry';
 import {drag} from 'd3-drag';
 import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
-import {EVENT_START, EVENT_END} from './events';
+import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
 
 export default class MeasureTool {
 
@@ -220,7 +220,7 @@ export default class MeasureTool {
       this._updateArea(this._geometry.nodes.length - 1,
         this._geometry.nodes[this._geometry.nodes.length - 1]);
     }
-
+    this._dispatchMeasureEvent();
   }
 
   _onRemoveOverlay() {
@@ -703,6 +703,20 @@ export default class MeasureTool {
   _hideTooltip() {
     if (this._options.tooltip) {
       this._tooltip.hide();
+    }
+  }
+
+  _dispatchMeasureEvent() {
+    if (!this._started) return;
+    if (typeof this._events.get(EVENT_CHANGE) === "function") {
+      this._events.get(EVENT_CHANGE)({
+        result: {
+          length: this.length,
+          lengthText: this.lengthText,
+          area: this.area,
+          areaText: this.areaText
+        }
+      });
     }
   }
 };

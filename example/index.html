@@ -36,11 +36,15 @@
     });
     measureTool.addListener('measure_start', () => {
       console.log('started');
-      measureTool.removeListener('measure_start')
+//      measureTool.removeListener('measure_start')
     });
     measureTool.addListener('measure_end', (e) => {
       console.log('ended', e.result);
-      measureTool.removeListener('measure_end');
+//      measureTool.removeListener('measure_end');
+    });
+    measureTool.addListener('measure_change', (e) => {
+      console.log('changed', e.result);
+//      measureTool.removeListener('measure_change');
     });
 
 
