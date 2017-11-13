@@ -60,6 +60,7 @@ var measureTool = new MeasureTool(map, {
 |**end()**|Return Value: **None** - ends measuring.|
 |**removeListener(eventName: `string`)**|Return Value: **None** - removes the given listener.|
 |**start()**|Return Value: **None** - starts measuring.|
+|**setOption(option: `string`, value: `string`)**|Return Value: **None** - updates a confirguration option and re-generates the drawn shape.|
 
 |Properties|Description|
 |----------|-----------|
