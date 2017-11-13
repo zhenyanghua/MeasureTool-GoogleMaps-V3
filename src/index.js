@@ -151,7 +151,7 @@ export default class MeasureTool {
      */
   setOption(option, value) {
     if (!this._options[option]) {
-        throw new Error(`${option} is not a valid option on MeasureTool`);
+      throw new Error(`${option} is not a valid option on MeasureTool`);
     }
 
     // TODO: figure out some option validation
@@ -163,7 +163,11 @@ export default class MeasureTool {
     }
 
     // update any values that might be there
-    this._redrawOverlay();
+    if (this._overlay) {
+      // only do this if there is actually an overlay to re-render
+      this._redrawOverlay();
+    }
+
   }
 
   _setOverlay() {
