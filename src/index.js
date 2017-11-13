@@ -163,7 +163,7 @@ export default class MeasureTool {
     }
 
     // update any values that might be there
-    if (this._overlay) {
+    if (this._overlay && this._nodeCircles) {
       // only do this if there is actually an overlay to re-render
       this._redrawOverlay();
     }
