@@ -9,26 +9,7 @@ export default class Helper {
   }
 
   init() {
-    switch (this._options.unit.toLowerCase()) {
-      case UnitTypeId.METRIC:
-        this._lengthMultiplier = 1;
-        this.formatLength = this._formatLengthMetric;
-        this._areaMultiplier = 1;
-        this.formatArea = this._formatAreaMetric;
-        break;
-      case UnitTypeId.IMPERIAL:
-        this._lengthMultiplier = 3.28084;
-        this.formatLength = this._formatLengthImperial;
-        this._areaMultiplier = 10.7639;
-        this.formatArea = this._formatAreaImperial;
-        break;
-      default:
-        this._lengthMultiplier = 1;
-        this.formatLength = this._formatLengthMetric;
-        this._areaMultiplier = 1;
-        this.formatArea = this._formatAreaMetric;
-        break;
-    }
+      this.initUnits();
   }
 
   static findTouchPoint(segment, point) {
@@ -52,6 +33,46 @@ export default class Helper {
   static makeId(n) {
     return (Math.random().toString(36)+'00000000000000000').slice(2, n + 2);
   }
+
+  initUnits () {
+    switch (this._options.unit.toLowerCase()) {
+      case UnitTypeId.METRIC:
+          this._lengthMultiplier = 1;
+          this.formatLength = this._formatLengthMetric;
+          this._areaMultiplier = 1;
+          this.formatArea = this._formatAreaMetric;
+          break;
+      case UnitTypeId.IMPERIAL:
+          this._lengthMultiplier = 3.28084;
+          this.formatLength = this._formatLengthImperial;
+          this._areaMultiplier = 10.7639;
+          this.formatArea = this._formatAreaImperial;
+          break;
+      default:
+          this._lengthMultiplier = 1;
+          this.formatLength = this._formatLengthMetric;
+          this._areaMultiplier = 1;
+          this.formatArea = this._formatAreaMetric;
+          break;
+    }
+  }
+
+  /**
+   * Updates a configuration option with a new value.  This is passed from the main index.js setOption function
+   * @param option - option to update
+   * @param value - value to set
+   */
+  setOption (option, value) {
+      if (!this._options[option]) {
+          throw new Error(`${option} is not a valid option on MeasureTool helper`);
+      }
+
+      // TODO: figure out some option validation
+      this._options[option] = value;
+
+      this.initUnits();
+  }
+
   /**
    * Calculate the distance in meters between two points.
    * @param p1

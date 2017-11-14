@@ -144,6 +144,32 @@ export default class MeasureTool {
     this._events.delete(event);
   }
 
+    /**
+     * Updates a configuration option with a new value
+     * @param option - option to update
+     * @param value - value to set
+     */
+  setOption(option, value) {
+    if (!this._options[option]) {
+      throw new Error(`${option} is not a valid option on MeasureTool`);
+    }
+
+    // TODO: figure out some option validation
+    this._options[option] = value;
+
+    // if this is an option that exists on the helper, try to set it there as well
+    if (this._helper._options[option]) {
+      this._helper.setOption(option, value);
+    }
+
+    // update any values that might be there
+    if (this._overlay && this._nodeCircles) {
+      // only do this if there is actually an overlay to re-render
+      this._redrawOverlay();
+    }
+
+  }
+
   _setOverlay() {
     this._overlay.onAdd = this._onAddOverlay.bind(this);
     this._overlay.draw = this._onDrawOverlay.bind(this);

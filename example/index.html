@@ -34,6 +34,10 @@
       tooltip: true,
       unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
     });
+
+    // test for setting units
+    measureTool.setOption('unit', MeasureTool.UnitTypeId.METRIC);
+
     measureTool.addListener('measure_start', () => {
       console.log('started');
 //      measureTool.removeListener('measure_start')
