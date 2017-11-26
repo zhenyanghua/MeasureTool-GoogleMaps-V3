@@ -95,6 +95,7 @@ export default class MeasureTool {
     if (typeof this._events.get(EVENT_START) === "function") {
       this._events.get(EVENT_START)();
     }
+    select(`.${Config.prefix}-svg-overlay`).style('visibility','visible');
   }
 
   /**
@@ -114,6 +115,7 @@ export default class MeasureTool {
     this._setOverlay();
     this._map.setOptions({draggableCursor: null});
     this._started = false;
+    select(`.${Config.prefix}-svg-overlay`).style('visibility','hidden');
 
     if (typeof this._events.get(EVENT_END) === "function") {
       this._events.get(EVENT_END)({
@@ -220,13 +222,13 @@ export default class MeasureTool {
         .selectAll('text')
         .data(this._geometry ? this._geometry.nodes : []);
     }
-
     this._hoverCircle = this._svgOverlay
       .append('g').attr('class', 'hover-circle');
     this._hoverCircle
       .append("circle")
       .attr('class', 'grey-circle')
       .attr('r', 5);
+    select(`.${Config.prefix}-svg-overlay`).style('visibility','hidden');
   }
 
   /**
@@ -234,6 +236,9 @@ export default class MeasureTool {
    * @private
    */
   _onDrawOverlay() {
+    if(this._started){
+        select(`.${Config.prefix}-svg-overlay`).style('visibility','visible');
+    }
     this._updateCircles();
     this._updateLine();
     if (this._options.showSegmentLength) {
