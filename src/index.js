@@ -50,7 +50,6 @@ export default class MeasureTool {
     this._helper = new Helper({
       unit: this._options.unit
     });
-    this._overlay = new google.maps.OverlayView();
     this._setOverlay();
   }
 
@@ -171,6 +170,7 @@ export default class MeasureTool {
   }
 
   _setOverlay() {
+    this._overlay = new google.maps.OverlayView();
     this._overlay.onAdd = this._onAddOverlay.bind(this);
     this._overlay.draw = this._onDrawOverlay.bind(this);
     this._overlay.onRemove = this._onRemoveOverlay.bind(this);
@@ -661,11 +661,11 @@ export default class MeasureTool {
   }
 
   _disableMapScroll() {
-    this._map.setOptions({ scrollwheel: false, zoomControl: false });
+    this._map.setOptions({ scrollwheel: false, gestureHandling: "none", zoomControl: false });
   }
 
   _enableMapScroll() {
-    this._map.setOptions({ scrollwheel: true, zoomControl: true });
+    this._map.setOptions({ scrollwheel: true, gestureHandling: "auto", zoomControl: true });
   }
 
   _transformNodeTextY(d, i) {
