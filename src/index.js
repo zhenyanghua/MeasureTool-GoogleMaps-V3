@@ -374,7 +374,7 @@ export default class MeasureTool {
       .data(this._geometry ? this._geometry.lines : [])
       .attr('class', 'segment-measure-text')
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'text-after-edge')
+      .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
@@ -386,7 +386,7 @@ export default class MeasureTool {
       .append('text')
       .attr('class', 'segment-measure-text')
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'text-after-edge')
+      .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
