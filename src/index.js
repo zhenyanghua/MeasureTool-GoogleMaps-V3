@@ -9,6 +9,7 @@ import {drag} from 'd3-drag';
 import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
 import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
+import {ObjectAssign} from './polyfills';
 
 export default class MeasureTool {
 
@@ -20,6 +21,8 @@ export default class MeasureTool {
   static get UnitTypeId() { return UnitTypeId};
 
   constructor(map, options) {
+    this._initPolyfills();
+
     this._options = {
       showSegmentLength: true,
       showAccumulativeLength: true,
@@ -33,6 +36,10 @@ export default class MeasureTool {
     this._id = Helper.makeId(4);
     this._events = new Map();
     this._init();
+  }
+
+  _initPolyfills() {
+    ObjectAssign();
   }
 
   _init() {
@@ -734,15 +741,17 @@ export default class MeasureTool {
 
   _dispatchMeasureEvent() {
     if (!this._started) return;
+    const result = {
+      result: {
+        length: this.length,
+        lengthText: this.lengthText,
+        area: this.area,
+        areaText: this.areaText
+      }
+    };
+    if (this._lastMeasure && this._lastMeasure.result.lengthText === this.lengthText && this._lastMeasure.result.areaText === this.areaText) return;
     if (typeof this._events.get(EVENT_CHANGE) === "function") {
-      this._events.get(EVENT_CHANGE)({
-        result: {
-          length: this.length,
-          lengthText: this.lengthText,
-          area: this.area,
-          areaText: this.areaText
-        }
-      });
+      this._events.get(EVENT_CHANGE)(this._lastMeasure = result);
     }
   }
 };
