@@ -672,11 +672,12 @@ export default class MeasureTool {
   }
 
   _disableMapScroll() {
+    this._zoomControl = !!document.querySelector("button[aria-label='Zoom in']");
     this._map.setOptions({ scrollwheel: false, gestureHandling: "none", zoomControl: false });
   }
 
   _enableMapScroll() {
-    this._map.setOptions({ scrollwheel: true, gestureHandling: "auto", zoomControl: true });
+    this._map.setOptions({ scrollwheel: true, gestureHandling: "auto", zoomControl: this._zoomControl });
   }
 
   _transformNodeTextY(d, i) {
