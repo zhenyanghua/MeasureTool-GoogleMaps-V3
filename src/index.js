@@ -88,6 +88,7 @@ export default class MeasureTool {
    */
   start() {
     if (this._started) return;
+    this._overlay.setMap(this._map);
     this._geometry = new Geometry();
 
     if (this._options.contextMenu && this._firstClick) {
@@ -120,6 +121,7 @@ export default class MeasureTool {
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
+    this._overlay.setMap(null);
     this._map.setOptions({draggableCursor: null});
     this._started = false;
 
