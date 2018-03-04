@@ -43,15 +43,17 @@ export default class MeasureTool {
   }
 
   _init() {
+    this._containerDiv = this._map.getDiv().querySelector("div:first-child");
+
     if (this._options.contextMenu) {
-      this._contextMenu = new ContextMenu(this._map.getDiv(), { width: 160 });
+      this._contextMenu = new ContextMenu(this._containerDiv, { width: 160 });
       this._startElementNode = this._contextMenu.addItem("Measure distance", true, this.start, this);
       this._endElementNode = this._contextMenu.addItem("Clear measurement", false, this.end, this);
       this._bindToggleContextMenu();
     }
 
     if (this._options.tooltip) {
-      this._tooltip = new Tooltip(this._map.getDiv());
+      this._tooltip = new Tooltip(this._containerDiv);
     }
 
     this._helper = new Helper({
@@ -70,7 +72,7 @@ export default class MeasureTool {
         this._contextMenu.hide();
       }
     });
-    this._map.getDiv().addEventListener('mousedown', event => {
+    this._containerDiv.addEventListener('mousedown', event => {
       if (event.clientX >= this._contextMenu.left &&
           event.clientX <= this._contextMenu.left + this._contextMenu.width &&
           event.clientY >= this._contextMenu.top &&
@@ -186,7 +188,7 @@ export default class MeasureTool {
 
   _onAddOverlay() {
     this._projection = this._overlay.getProjection();
-    this._projectionUtility = new ProjectionUtility(this._map.getDiv(), this._projection);
+    this._projectionUtility = new ProjectionUtility(this._containerDiv, this._projection);
     // Add svg to Pane
     this._svgOverlay = select(this._overlay.getPanes().overlayMouseTarget)
       .append('div')

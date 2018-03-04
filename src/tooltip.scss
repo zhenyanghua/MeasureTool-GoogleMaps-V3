@@ -1,5 +1,6 @@
 $font-family: Roboto, Arial, sans-serif;
 .measure-tool-tooltip {
+  display: none;
   font-family: $font-family;
   margin: 6px 15px;
   background-color: #fff;
@@ -9,4 +10,5 @@ $font-family: Roboto, Arial, sans-serif;
   overflow: hidden;
   pointer-events: none;
   font-size: 0.7rem;
+  z-index: 999;
 }
