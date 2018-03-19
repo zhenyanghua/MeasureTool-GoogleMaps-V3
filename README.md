@@ -8,9 +8,7 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 ![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
 
 ## Changes
-### v0.1.0
-*Released on 03/18/2018*
-- **[New Feature]** Added `Array<Segment>` to the `MeasureResult`. Example see [#31](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/31).
+[Change List](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/blob/master/CHANGES.md)
 
 ## Developer usage
 #### Dependency

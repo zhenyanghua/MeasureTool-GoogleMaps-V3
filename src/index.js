@@ -122,7 +122,6 @@ export default class MeasureTool {
     this._mapZoomChangedEvent.remove();
 
     this._geometry = new Geometry();
-    this._segments = [];
     this._onRemoveOverlay();
     this._setOverlay();
     this._overlay.setMap(null);
@@ -135,7 +134,8 @@ export default class MeasureTool {
           length: this.length,
           lengthText: this.lengthText,
           area: this.area,
-          areaText: this.areaText
+          areaText: this.areaText,
+          segments: this.segments
         }
       });
     }
@@ -747,7 +747,7 @@ export default class MeasureTool {
         lengthText: this.lengthText,
         area: this.area,
         areaText: this.areaText,
-        segments: this._segments
+        segments: this.segments
       }
     };
     if (this._lastMeasure && this._lastMeasure.result.lengthText === this.lengthText && this._lastMeasure.result.areaText === this.areaText) return;
