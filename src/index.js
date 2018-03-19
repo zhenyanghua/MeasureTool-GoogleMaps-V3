@@ -5,6 +5,7 @@ import Tooltip from './tooltip';
 import {select, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
 import {Geometry} from 'geometry';
+import {Segment} from 'segment';
 import {drag} from 'd3-drag';
 import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
@@ -17,6 +18,7 @@ export default class MeasureTool {
   get areaText() { return this._helper.formatArea(this._area || 0); };
   get length() { return this._length || 0; };
   get area() { return this._area || 0; };
+  get segments() { return this._segments || []};
 
   static get UnitTypeId() { return UnitTypeId};
 
@@ -90,6 +92,7 @@ export default class MeasureTool {
     if (this._started) return;
     this._overlay.setMap(this._map);
     this._geometry = new Geometry();
+    this._segments = [];
 
     if (this._options.contextMenu && this._firstClick) {
       this._checkClick(this._firstClick);
@@ -119,6 +122,7 @@ export default class MeasureTool {
     this._mapZoomChangedEvent.remove();
 
     this._geometry = new Geometry();
+    this._segments = [];
     this._onRemoveOverlay();
     this._setOverlay();
     this._overlay.setMap(null);
@@ -321,6 +325,8 @@ export default class MeasureTool {
   }
 
   _updateLine() {
+    this._segments = [];
+
     let linesBase = this._linesBase
       .selectAll("line")
       .data(this._geometry ? this._geometry.lines : [])
@@ -328,7 +334,8 @@ export default class MeasureTool {
         .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
         .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+        .each(d => this._updateSegment(d));
 
     linesBase
       .enter()
@@ -337,7 +344,8 @@ export default class MeasureTool {
         .attr('x1', d => this._projectionUtility.latLngToSvgPoint(d[0])[0])
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
         .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+        .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+        .each(d => this._updateSegment(d));
 
     linesBase.exit().remove();
 
@@ -389,7 +397,7 @@ export default class MeasureTool {
       .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
-        return this._doTextTransform(p1, p2);
+        return Helper.transformText(p1, p2);
       })
       .text((d, i) => this._helper.formatLength(this._helper.computeLengthBetween(d[0], d[1])));
 
@@ -401,7 +409,7 @@ export default class MeasureTool {
       .attr('transform', d => {
         let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
         let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
-        return this._doTextTransform(p1, p2);
+        return Helper.transformText(p1, p2);
       })
       .text((d, i) => this._helper.formatLength(this._helper.computeLengthBetween(d[0], d[1])));
 
@@ -585,7 +593,7 @@ export default class MeasureTool {
         .attr('transform', d => {
           let p1 = [event.x, event.y];
           let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
-          return this._doTextTransform(p1, p2);
+          return Helper.transformText(p1, p2);
         })
         .text(d => this._helper.formatLength(this._helper.computeLengthBetween(
           this._projectionUtility.svgPointToLatLng([event.x, event.y]), d[1])));
@@ -595,7 +603,7 @@ export default class MeasureTool {
         .attr('transform', d => {
           let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
           let p2 = [event.x, event.y];
-          return this._doTextTransform(p1, p2);
+          return Helper.transformText(p1, p2);
         })
         .text(d => this._helper.formatLength(this._helper.computeLengthBetween(
           d[0], this._projectionUtility.svgPointToLatLng([event.x, event.y]))));
@@ -639,19 +647,6 @@ export default class MeasureTool {
         }
         return this._helper.formatLength(len);
       });
-  }
-
-  _doTextTransform(p1, p2) {
-      let mid = Helper.findMidPoint([p1, p2]);
-      let angle;
-      if (p1[0] === p2[0]) {
-        if (p2[1] > p1[1]) angle = 90;
-        else if (p2[1] < p1[1]) angle = 270;
-        else angle = 0;
-      } else {
-        angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
-      }
-      return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
   }
 
   _updateHoverCirclePosition(x, y) {
@@ -751,12 +746,19 @@ export default class MeasureTool {
         length: this.length,
         lengthText: this.lengthText,
         area: this.area,
-        areaText: this.areaText
+        areaText: this.areaText,
+        segments: this._segments
       }
     };
     if (this._lastMeasure && this._lastMeasure.result.lengthText === this.lengthText && this._lastMeasure.result.areaText === this.areaText) return;
     if (typeof this._events.get(EVENT_CHANGE) === "function") {
       this._events.get(EVENT_CHANGE)(this._lastMeasure = result);
     }
+  }
+
+  _updateSegment(d) {
+    const len = this._helper.computeLengthBetween(d[0], d[1]);
+    const lenTxt = this._helper.formatLength(len);
+    this.segments.push(new Segment(d[0], d[1], len,lenTxt).toJSON());
   }
 };

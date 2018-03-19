@@ -7,6 +7,10 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 
 ![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
 
+## Changes
+### v0.1.0
+- **[New Feature]** Added `Array<Segment>` to the `MeasureResult`. Example see [#31].(https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/31)
+
 ## Developer usage
 #### Dependency
 Make sure the **`geometry`** library is referenced in the **Google Maps JavaScript API** loading script.
@@ -85,7 +89,7 @@ var measureTool = new MeasureTool(map, {
 ### MeasureEvent object specification
 |Properties|Description|
 |----------|-----------|
-|**result**|Type: `MeasureResult` - The result of the measuring.|
+|**result**|Type: `MeasureResult` - the result of the measuring.|
 
 ### MeasureResult object specification
 |Properties|Description|
@@ -94,6 +98,26 @@ var measureTool = new MeasureTool(map, {
 |**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
 |**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 |**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
+|**segments**|Type: `Array<Segment>` - an array of all segments in measurement.|
+
+### Segment object specification
+|Properties|Description|
+|----------|-----------|
+|**start**|Type: `SegmentPoint` - the latitude and longitude of the segment start location.|
+|**end**|Type: `SegmentPoint` - the latitude and longitude of the segment end location.|
+|**length**|Type: `SegmentLength` - the length of the segment.|
+
+### SegmentPoint object specification
+|Properties|Description|
+|----------|-----------|
+|**lat**|Type: `number` - the latitude of a segment point.|
+|**lng**|Type: `number` - the longitude of a segment point.|
+
+### SegmentLength object specification
+|Properties|Description|
+|----------|-----------|
+|**text**|Type: `string` - the formatted length of a segment.|
+|**value**|Type: `number` - the length of a segment, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 
 ### UnitTypeId constants
 Identifiers for common UnitType. Specify these by value, or by using the constant's name. For example, `'metric'` or `MeasureTool.UnitTypeId.METRIC`.

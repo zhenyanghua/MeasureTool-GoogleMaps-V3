@@ -30,6 +30,19 @@ export default class Helper {
     ];
   }
 
+  static transformText(p1, p2) {
+    let mid = Helper.findMidPoint([p1, p2]);
+    let angle;
+    if (p1[0] === p2[0]) {
+      if (p2[1] > p1[1]) angle = 90;
+      else if (p2[1] < p1[1]) angle = 270;
+      else angle = 0;
+    } else {
+      angle = Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) * 180 / Math.PI;
+    }
+    return `translate(${mid[0]}, ${mid[1]}) rotate(${angle})`;
+  }
+
   static makeId(n) {
     return (Math.random().toString(36)+'00000000000000000').slice(2, n + 2);
   }
