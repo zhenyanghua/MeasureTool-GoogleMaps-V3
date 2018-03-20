@@ -81,6 +81,7 @@ var measureTool = new MeasureTool(map, {
 ### MeasureToolOptions object specification
 |Properties|Description|
 |----------|-----------|
+|**contextMenu**|Type: `boolean` - use out-of-box contextMenu. If you desire the widget being started and stopped by your own UI, you may set this option to `false`. Enabled by default.|
 |**showSegmentLength**|Type: `boolean` - display segment length along the path. Enabled by default.|
 |**tooltip**|Type: `boolean` - display tooltip when hover the drawing path. Enabled by default.|
 |**unit**|Type: `UnitTypeId` - the unit type to use for the measured length and area. Defaults to `MeasureTool.UnitTypeId.METRIC`.|
