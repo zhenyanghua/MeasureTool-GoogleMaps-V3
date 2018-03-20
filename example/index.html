@@ -24,9 +24,20 @@
 <script>
   var map, measureTool;
   function initMap() {
+//    map = new google.maps.Map(document.getElementById('map'), {
+//      center: {lat: -34.397, lng: 150.644},
+//      zoom: 8,
+//      scaleControl: true
+//    });
+//    measureTool = new MeasureTool(map, {
+//      showSegmentLength: true,
+//      tooltip: true,
+//      unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
+//    });
+
     map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: -34.397, lng: 150.644},
-      zoom: 8,
+      center: {lat: 47.94796, lng: -116.707975},
+      zoom: 16,
       scaleControl: true
     });
     measureTool = new MeasureTool(map, {
@@ -34,6 +45,24 @@
       tooltip: true,
       unit: MeasureTool.UnitTypeId.IMPERIAL // metric or imperial
     });
+
+    var marker1 = new google.maps.Marker({
+      position: {lat: 47.94796, lng: -116.70797},
+      map: map,
+      label: "1"
+    });
+    marker1.addListener('click', function() {
+      alert("Marker 1 has been clicked");
+    })
+
+    var marker2 = new google.maps.Marker({
+      position: {lat: 47.95028, lng: -116.69907},
+      map: map,
+      label: "2"
+    });
+    marker2.addListener('click', function() {
+      alert("Marker 2 has been clicked");
+    })
 
     // test for setting units
 //    measureTool.setOption('unit', MeasureTool.UnitTypeId.METRIC);

@@ -62,6 +62,7 @@ export default class MeasureTool {
       unit: this._options.unit
     });
     this._setOverlay();
+    this._overlay.setMap(null);
   }
 
   _bindToggleContextMenu() {
