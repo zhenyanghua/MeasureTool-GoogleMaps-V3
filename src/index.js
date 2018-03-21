@@ -198,10 +198,6 @@ export default class MeasureTool {
   }
 
   _onAddOverlay() {
-    if (this._initComplete && !this._started) {
-      this._overlay.setMap(null);
-    }
-
     if (!this._initComplete) {
       this._initComplete = true;
     }
@@ -255,6 +251,10 @@ export default class MeasureTool {
       .append("circle")
       .attr('class', 'grey-circle')
       .attr('r', 5);
+
+    if (this._initComplete && !this._started) {
+      this._overlay.setMap(null);
+    }
   }
 
   /**
