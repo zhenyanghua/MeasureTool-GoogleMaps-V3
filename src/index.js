@@ -61,8 +61,7 @@ export default class MeasureTool {
     this._helper = new Helper({
       unit: this._options.unit
     });
-    this._setOverlay();
-    this._overlay.setMap(null);
+    this._initOverlay();
   }
 
   _bindToggleContextMenu() {
@@ -185,6 +184,11 @@ export default class MeasureTool {
 
   }
 
+  _initOverlay() {
+    this._setOverlay();
+    this._initComplete = false;
+  }
+
   _setOverlay() {
     this._overlay = new google.maps.OverlayView();
     this._overlay.onAdd = this._onAddOverlay.bind(this);
@@ -194,6 +198,14 @@ export default class MeasureTool {
   }
 
   _onAddOverlay() {
+    if (this._initComplete && !this._started) {
+      this._overlay.setMap(null);
+    }
+
+    if (!this._initComplete) {
+      this._initComplete = true;
+    }
+
     this._projection = this._overlay.getProjection();
     this._projectionUtility = new ProjectionUtility(this._containerDiv, this._projection);
     // Add svg to Pane
