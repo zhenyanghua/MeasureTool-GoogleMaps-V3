@@ -3,7 +3,7 @@
 A handy measurement widget for Google Maps API v3. The functionalities are implemented as close as to what current Google Maps offers.
 
 ## Demo
-[Visit demo page](http://projects.leafyjava.com/measuretool/)
+[Visit demo page](https://www.leafyjava.com/projects/measuretool)
 
 ![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
 

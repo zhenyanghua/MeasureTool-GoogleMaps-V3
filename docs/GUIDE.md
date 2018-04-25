@@ -1,4 +1,7 @@
 # Developer Guide
+#### Demo
+[Live Demo](https://www.leafyjava.com/projects/measuretool) hosted on LeafyJava.com
+
 #### Dependency
 Make sure the **`geometry`** library is referenced in the **Google Maps JavaScript API** loading script.
 ```html
@@ -27,5 +30,22 @@ The `MeasureTool` comes with a context menu out of box for saving your time to c
 var measureTool = new MeasureTool(map, {
   contextMenu: false
   // some other options...
+});
+```
+
+#### Use with Google Geometry
+When using this measure tool with Google geometries, if the geometry is interactive and has mouse events, use the following pattern could make them work nicely together.
+
+```javascript
+var polygon = new Google.maps.Polygon({
+  clickable: true,
+  // other options...
+});
+
+measureTool.addListener('measure_start', function() {
+  polygon.setOptions({clickable: false});
+});
+measureTool.addListener('measure_end', function() {
+  polygon.setOptions({clickable: true});
 });
 ```
