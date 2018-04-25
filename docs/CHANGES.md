@@ -1,7 +1,7 @@
 # Changes
 ## v0.1.4
 *Released on 03/21/2018*
-- **[Bug Fix]** Fixed an newly introduced initialization bug caused from v0.1.2. Details see [#34](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/34).
+- **[Bug Fix]** Fixed a newly introduced initialization bug caused from v0.1.2. Details see [#34](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/34).
 
 ## v0.1.2
 *Released on 03/20/2018*
