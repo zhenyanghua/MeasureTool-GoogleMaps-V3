@@ -61,6 +61,12 @@ export default class Helper {
           this._areaMultiplier = 10.7639;
           this.formatArea = this._formatAreaImperial;
           break;
+      case UnitTypeId.NAUTICAL:
+          this._lengthMultiplier = 3.28084;
+          this.formatLength = this._formatLengthMetric;
+          this._areaMultiplier = 10.7639;
+          this.formatArea = this._formatAreaMetric;
+          break;
       default:
           this._lengthMultiplier = 1;
           this.formatLength = this._formatLengthMetric;
