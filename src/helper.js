@@ -61,6 +61,12 @@ export default class Helper {
           this._areaMultiplier = 10.7639;
           this.formatArea = this._formatAreaImperial;
           break;
+      case UnitTypeId.NAUTICAL:
+          this._lengthMultiplier = 1;
+          this.formatLength = this._formatLengthNautical;
+          this._areaMultiplier = 1;
+          this.formatArea = this._formatAreaMetric;
+          break;
       default:
           this._lengthMultiplier = 1;
           this.formatLength = this._formatLengthMetric;
@@ -134,6 +140,12 @@ export default class Helper {
     } else {
       unit = 'ft';
     }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatLengthNautical(value) {
+    let unit = 'NM';
+    value /= 1852;
     return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
