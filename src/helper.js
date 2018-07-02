@@ -61,7 +61,7 @@ export default class Helper {
           this._areaMultiplier = 10.7639;
           this.formatArea = this._formatAreaImperial;
           break;
-      case _UnitTypeId.UnitTypeId.NAUTICAL:
+      case UnitTypeId.NAUTICAL:
           this._lengthMultiplier = 1;
           this.formatLength = this._formatLengthNautical;
           this._areaMultiplier = 1;
@@ -144,10 +144,9 @@ export default class Helper {
   }
 
   _formatLengthNautical(value) {
-    var unit = void 0;
-    unit = 'NM';
+    let unit = 'NM';
     value /= 1852;
-    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + 'NM';
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatAreaMetric(value) {
