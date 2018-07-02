@@ -1,5 +1,5 @@
 # Changes
-## v0.1.5
+## v0.2.0
 *Released on 07/02/2018*
 - **[Enhancement]** Added new unit - **Nautical Miles (NM)** Details see [PR #40](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/pull/40).
 
