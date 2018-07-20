@@ -9,8 +9,9 @@
 |**addListener(eventName: `string`, handler:`Function`)**|Return Value: **None** - addes the given listener function to the given event name.|
 |**end()**|Return Value: **None** - ends measuring.|
 |**removeListener(eventName: `string`)**|Return Value: **None** - removes the given listener.|
-|**start()**|Return Value: **None** - starts measuring.|
 |**setOption(option: `string`, value: `string`)**|Return Value: **None** - updates a confirguration option and re-generates the drawn shape.|
+|**start()**|Return Value: **None** - starts measuring.|
+
 
 |Properties|Description|
 |----------|-----------|
@@ -50,9 +51,9 @@
 ### Segment object specification
 |Properties|Description|
 |----------|-----------|
-|**start**|Type: `SegmentPoint` - the latitude and longitude of the segment start location.|
 |**end**|Type: `SegmentPoint` - the latitude and longitude of the segment end location.|
 |**length**|Type: `SegmentLength` - the length of the segment.|
+|**start**|Type: `SegmentPoint` - the latitude and longitude of the segment start location.|
 
 ### SegmentPoint object specification
 |Properties|Description|
@@ -73,3 +74,4 @@ Identifiers for common UnitType. Specify these by value, or by using the constan
 |--------|-----------|
 |**IMPERIAL**|This unit type shows measured length in US foot (ft) and mile (mi), and area in US square foot (ft²) and square mile (mi²).|
 |**METRIC**|This unit type shows measured length in meter (m) and kilometer (km), and area in square meter (m²) and square kilometer (km²).|
+|**NAUTICAL**|This unit type shows measured length in nautical mile (NM), and area in square meter (m²) and square kilometer (km²).|
