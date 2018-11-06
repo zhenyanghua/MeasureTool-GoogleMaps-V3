@@ -51,9 +51,9 @@
 ### Segment object specification
 |Properties|Description|
 |----------|-----------|
-|**end**|Type: `SegmentPoint` - the latitude and longitude of the segment end location.|
+|**end_location**|Type: `SegmentPoint` - the latitude and longitude of the segment end location.|
 |**length**|Type: `SegmentLength` - the length of the segment.|
-|**start**|Type: `SegmentPoint` - the latitude and longitude of the segment start location.|
+|**start_location**|Type: `SegmentPoint` - the latitude and longitude of the segment start location.|
 
 ### SegmentPoint object specification
 |Properties|Description|
