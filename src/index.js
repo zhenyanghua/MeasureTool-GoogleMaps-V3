@@ -23,7 +23,7 @@ export default class MeasureTool {
   static get UnitTypeId() { return UnitTypeId};
 
   constructor(map, options) {
-    this._initPolyfills();
+    MeasureTool._initPolyfills();
 
     this._options = {
       showSegmentLength: true,
@@ -40,7 +40,7 @@ export default class MeasureTool {
     this._init();
   }
 
-  _initPolyfills() {
+  static _initPolyfills() {
     ObjectAssign();
   }
 
