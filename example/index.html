@@ -16,10 +16,28 @@
       margin: 0;
       padding: 0;
     }
+    #start-with-points {
+      position: absolute;
+      top: 100px;
+      left: 10px;
+    }
+    #start {
+      position: absolute;
+      top: 120px;
+      left: 10px;
+    }
+    #end {
+      position: absolute;
+      top: 140px;
+      left: 10px;
+    }
   </style>
 </head>
 <body>
 <div id="map"></div>
+<button id="start-with-points" onclick="measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}])">Start With Initial Points</button>
+<button id="start" onclick="measureTool.start()">Start</button>
+<button id="end" onclick="measureTool.end()">End</button>
 <script src="../lib/MeasureTool.js"></script>
 <script>
   var map, measureTool;
@@ -30,6 +48,7 @@
       scaleControl: true
     });
     measureTool = new MeasureTool(map, {
+      contextMenu: false,
       showSegmentLength: true,
       tooltip: true,
       unit: MeasureTool.UnitTypeId.METRIC // metric, imperial, or nautical

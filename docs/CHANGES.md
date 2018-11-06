@@ -1,4 +1,8 @@
 # Changes
+## v0.3.0
+*Released on 11/06/2018*
+- **[New Feature]** Allow to pass in an array of points when starting measurement in contextMenu-disabled mode. Find the usage at the [Developer Guide](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/blob/master/docs/GUIDE.md#start-measurement-with-initial-points).
+
 ## v0.2.0
 *Released on 07/02/2018*
 - **[Enhancement]** Added new unit - **Nautical Miles (NM)** Details see [PR #40](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/pull/40).

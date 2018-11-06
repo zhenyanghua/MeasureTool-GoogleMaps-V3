@@ -33,6 +33,18 @@ var measureTool = new MeasureTool(map, {
 });
 ```
 
+#### Start Measurement with Initial Points
+When there is need to start the measurement with a set of predefined points, the contextMenu must be set to false, otherwise the predefined points are ignored. 
+```html
+<button id="start-with-points" onclick="measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}])">Start With Initial Points</button>
+<button id="end" onclick="measureTool.end()">End</button>
+```
+```javascript
+var measureTool = new MeasureTool(map, {
+  contextMenu: false
+});
+```
+
 #### Use with Google Geometry
 When using this measure tool with Google geometries, if the geometry is interactive and has mouse events, use the following pattern could make them work nicely together.
 

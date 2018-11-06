@@ -30,7 +30,8 @@ export default class MeasureTool {
       showAccumulativeLength: true,
       contextMenu: true,
       tooltip: true,
-      unit: UnitTypeId.METRIC
+      unit: UnitTypeId.METRIC,
+      initialSegments: []
     };
     Object.assign(this._options, options);
     this._map = map;
@@ -87,12 +88,24 @@ export default class MeasureTool {
 
   /**
    * start measuring
+   * @param {SegmentPoint[]} initialPoints - an array of {SegmentPoint} to initialize the measurement.
    */
-  start() {
+  start(initialPoints) {
     if (this._started) return;
     this._overlay.setMap(this._map);
     this._geometry = new Geometry();
     this._segments = [];
+
+    if (!this._options.contextMenu && initialPoints && initialPoints.length > 0) {
+      for (let i = 0; i < initialPoints.length; i++) {
+        const p = initialPoints[i];
+        this._geometry.addNode([p.lng, p.lat]);
+        if (i > 0) {
+          const p0 = initialPoints[i - 1];
+          this._updateSegment([p0, p]);
+        }
+      }
+    }
 
     if (this._options.contextMenu && this._firstClick) {
       this._checkClick(this._firstClick);
@@ -296,8 +309,8 @@ export default class MeasureTool {
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
     if(!this._dragged && this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
-      let latLng = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
-      this._geometry.addNode(latLng);
+      const node = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
+      this._geometry.addNode(node);
       this._overlay.draw();
     }
     this._dragged = false;
@@ -772,6 +785,6 @@ export default class MeasureTool {
   _updateSegment(d) {
     const len = this._helper.computeLengthBetween(d[0], d[1]);
     const lenTxt = this._helper.formatLength(len);
-    this.segments.push(new Segment(d[0], d[1], len,lenTxt).toJSON());
+    this._segments.push(new Segment(d[0], d[1], len,lenTxt).toJSON());
   }
 };
