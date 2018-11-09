@@ -74,4 +74,6 @@ Identifiers for common UnitType. Specify these by value, or by using the constan
 |--------|-----------|
 |**IMPERIAL**|This unit type shows measured length in US foot (ft) and mile (mi), and area in US square foot (ft²) and square mile (mi²).|
 |**METRIC**|This unit type shows measured length in meter (m) and kilometer (km), and area in square meter (m²) and square kilometer (km²).|
+|**IMPERIAL_ACRES**|This unit type shows measured length in US foot (ft) and mile (mi), and area in acres.|
+|**METRIC_HECTARES**|This unit type shows measured length in meter (m) and kilometer (km), and area in hectares.|
 |**NAUTICAL**|This unit type shows measured length in nautical mile (NM), and area in square meter (m²) and square kilometer (km²).|
