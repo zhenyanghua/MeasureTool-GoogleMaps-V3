@@ -61,6 +61,18 @@ export default class Helper {
           this._areaMultiplier = 10.7639;
           this.formatArea = this._formatAreaImperial;
           break;
+      case UnitTypeId.METRIC_HECTARES:
+          this._lengthMultiplier = 1;
+          this.formatLength = this._formatLengthMetric;
+          this._areaMultiplier = 1;
+          this.formatArea = this._formatAreaHectares;
+          break;
+      case UnitTypeId.IMPERIAL_ACRES:
+          this._lengthMultiplier = 3.28084;
+          this.formatLength = this._formatLengthImperial;
+          this._areaMultiplier = 10.7639;
+          this.formatArea = this._formatAreaAcres;
+          break;
       case UnitTypeId.NAUTICAL:
           this._lengthMultiplier = 1;
           this.formatLength = this._formatLengthNautical;
@@ -168,6 +180,18 @@ export default class Helper {
     } else {
       unit = 'ft²';
     }
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaHectares(value) {
+    let unit = 'hectares';
+    value /= 10000;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
+  }
+
+  _formatAreaAcres(value) {
+    let unit;
+    value /= 43560;
     return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
