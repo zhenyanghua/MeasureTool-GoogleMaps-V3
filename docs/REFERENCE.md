@@ -6,7 +6,7 @@
 
 |Methods|Description|
 |-------|-----------|
-|**addListener(eventName: `string`, handler:`Function`)**|Return Value: **None** - addes the given listener function to the given event name.|
+|**addListener(eventName: `string`, handler:`Function`)**|Return Value: **None** - adds the given listener function to the given event name.|
 |**end()**|Return Value: **None** - ends measuring.|
 |**removeListener(eventName: `string`)**|Return Value: **None** - removes the given listener.|
 |**setOption(option: `string`, value: `string`)**|Return Value: **None** - updates a confirguration option and re-generates the drawn shape.|
@@ -19,6 +19,8 @@
 |**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
 |**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 |**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
+|**points**|Type: `Array<SegmentPoint>` - an array of segment points in measurement.|
+|**segments**|Type: `Array<Segment>` - an array of all segments in measurement.|
 
 |Events|Description|
 |------|-----------|
@@ -46,6 +48,7 @@
 |**areaText**|Type: `string` - the formatted total area with unit of the enclosed polygon.|
 |**length**|Type: `number` - the total length of the path drawn, the unit is **m** for `metric` unit and **ft** for `imperial` unit.|
 |**lengthText**|Type: `string` - the formatted total length with unit of the path drawn.|
+|**points**|Type: `Array<SegmentPoint>` - an array of segment points in measurement.|
 |**segments**|Type: `Array<Segment>` - an array of all segments in measurement.|
 
 ### Segment object specification

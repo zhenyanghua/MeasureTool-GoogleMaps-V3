@@ -1,4 +1,8 @@
 # Changes
+## v0.4.0
+*Released on 11/12/2018*
+- **[Enhancement]**  Expose getters for segments and points of measurements. [#45](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/45)
+
 ## v0.3.0
 *Released on 11/06/2018*
 - **[New Feature]** Allow to pass in an array of points when starting measurement in contextMenu-disabled mode. Find the usage at the [Developer Guide](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/blob/master/docs/GUIDE.md#start-measurement-with-initial-points).

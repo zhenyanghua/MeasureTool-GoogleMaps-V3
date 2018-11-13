@@ -11,6 +11,7 @@ import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
 import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
 import {ObjectAssign} from './polyfills';
+import {deepClone} from "./utils";
 
 export default class MeasureTool {
 
@@ -18,10 +19,16 @@ export default class MeasureTool {
   get areaText() { return this._helper.formatArea(this._area || 0); };
   get length() { return this._length || 0; };
   get area() { return this._area || 0; };
-  get segments() { return this._segments || []};
+  get segments() { return deepClone(this._segments) || []; };
+  get points() { return deepClone(this._geometry.nodes.map(x=> ({lat: x[1], lng: x[0]}))) || []; };
 
   static get UnitTypeId() { return UnitTypeId};
 
+  /**
+   * Creates a new measure tool for the google.maps.Map instance.
+   * @param map - {google.maps.Map} instance.
+   * @param options {MeasureToolOptions}
+   */
   constructor(map, options) {
     MeasureTool._initPolyfills();
 
@@ -127,19 +134,6 @@ export default class MeasureTool {
    */
   end() {
     if (!this._started) return;
-    if (this._options.contextMenu) {
-      this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
-    }
-
-    this._mapClickEvent.remove();
-    this._mapZoomChangedEvent.remove();
-
-    this._geometry = new Geometry();
-    this._onRemoveOverlay();
-    this._setOverlay();
-    this._overlay.setMap(null);
-    this._map.setOptions({draggableCursor: null});
-    this._started = false;
 
     if (typeof this._events.get(EVENT_END) === "function") {
       this._events.get(EVENT_END)({
@@ -148,10 +142,25 @@ export default class MeasureTool {
           lengthText: this.lengthText,
           area: this.area,
           areaText: this.areaText,
-          segments: this.segments
+          segments: this.segments,
+          points: this.points
         }
       });
     }
+
+    if (this._options.contextMenu) {
+      this._contextMenu.toggleItems([this._startElementNode], [this._endElementNode]);
+
+    }
+    this._mapClickEvent.remove();
+    this._mapZoomChangedEvent.remove();
+    this._geometry = new Geometry();
+    this._onRemoveOverlay();
+    this._setOverlay();
+    this._overlay.setMap(null);
+    this._map.setOptions({draggableCursor: null});
+
+    this._started = false;
   }
 
   /**
@@ -171,11 +180,11 @@ export default class MeasureTool {
     this._events.delete(event);
   }
 
-    /**
-     * Updates a configuration option with a new value
-     * @param option - option to update
-     * @param value - value to set
-     */
+  /**
+   * Updates a configuration option with a new value
+   * @param option - option to update
+   * @param value - value to set
+   */
   setOption(option, value) {
     if (!this._options[option]) {
       throw new Error(`${option} is not a valid option on MeasureTool`);
@@ -773,7 +782,8 @@ export default class MeasureTool {
         lengthText: this.lengthText,
         area: this.area,
         areaText: this.areaText,
-        segments: this.segments
+        segments: this.segments,
+        points: this.points
       }
     };
     if (this._lastMeasure && this._lastMeasure.result.lengthText === this.lengthText && this._lastMeasure.result.areaText === this.areaText) return;

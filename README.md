@@ -9,7 +9,6 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 - Visualize and measure predefined points or as you go.
 - Built-in UI for measurement for convenience.
 - API for more customizations.
-- Support Google Maps JavaScript API V3
 - Support most modern browsers (Chrome, Firefox, Safari, Edge, IE11)
 
 ## Demo
