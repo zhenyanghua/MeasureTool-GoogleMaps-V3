@@ -11,7 +11,7 @@
 |**removeListener(eventName: `string`)**|Return Value: **None** - removes the given listener.|
 |**setOption(option: `string`, value: `string`)**|Return Value: **None** - updates a confirguration option and re-generates the drawn shape.|
 |**start()**|Return Value: **None** - starts measuring.|
-|**start(initialPoints: `Array<SegmentPoint>`)**|Return Value: **None** - starts measuring with initial points. **The `contextMenu` option must be set to `false`, otherwise, the initial points are ignored.**. Use this method to start a measurement if there are point data need to be loaded as the initial part of the measurement.|
+|**start(initialPoints: `Array<SegmentPoint>`)**|Return Value: **None** - starts measuring with initial points. **The `contextMenu` option must be set to `false`, otherwise, the initial points are ignored.**. Use this method to start a measurement if there are point data need to be loaded as the initial part of the measurement. This is an asynchronous operation. Changes could be observed by listening to the `'measure_change'` event.|
 
 |Properties|Description|
 |----------|-----------|

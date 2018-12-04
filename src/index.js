@@ -102,8 +102,9 @@ export default class MeasureTool {
     this._overlay.setMap(this._map);
     this._geometry = new Geometry();
     this._segments = [];
+    const hasInitialPoints = initialPoints && initialPoints.length > 0;
 
-    if (!this._options.contextMenu && initialPoints && initialPoints.length > 0) {
+    if (!this._options.contextMenu && hasInitialPoints) {
       for (let i = 0; i < initialPoints.length; i++) {
         const p = initialPoints[i];
         this._geometry.addNode([p.lng, p.lat]);
@@ -136,16 +137,7 @@ export default class MeasureTool {
     if (!this._started) return;
 
     if (typeof this._events.get(EVENT_END) === "function") {
-      this._events.get(EVENT_END)({
-        result: {
-          length: this.length,
-          lengthText: this.lengthText,
-          area: this.area,
-          areaText: this.areaText,
-          segments: this.segments,
-          points: this.points
-        }
-      });
+      this._events.get(EVENT_END)(this._getResults());
     }
 
     if (this._options.contextMenu) {
@@ -776,16 +768,8 @@ export default class MeasureTool {
 
   _dispatchMeasureEvent() {
     if (!this._started) return;
-    const result = {
-      result: {
-        length: this.length,
-        lengthText: this.lengthText,
-        area: this.area,
-        areaText: this.areaText,
-        segments: this.segments,
-        points: this.points
-      }
-    };
+    const result = this._getResults();
+
     if (this._lastMeasure && this._lastMeasure.result.lengthText === this.lengthText && this._lastMeasure.result.areaText === this.areaText) return;
     if (typeof this._events.get(EVENT_CHANGE) === "function") {
       this._events.get(EVENT_CHANGE)(this._lastMeasure = result);
@@ -796,5 +780,18 @@ export default class MeasureTool {
     const len = this._helper.computeLengthBetween(d[0], d[1]);
     const lenTxt = this._helper.formatLength(len);
     this._segments.push(new Segment(d[0], d[1], len,lenTxt).toJSON());
+  }
+
+  _getResults() {
+    return ({
+      result: {
+        length: this.length,
+        lengthText: this.lengthText,
+        area: this.area,
+        areaText: this.areaText,
+        segments: this.segments,
+        points: this.points
+      }
+    });
   }
 };
