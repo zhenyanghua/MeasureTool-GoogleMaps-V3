@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>MeasureTool for Google Maps API</title>
+    <link rel="icon"
+          type="image/png"
+          href="/images/leafyjava52x52-trans.png">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        #instructions {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 25px;
+            margin: 10px;
+            background-color: white;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+            max-width: 400px;
+        }
+
+        #instructions a {
+            color: #ff7204;
+        }
+
+        #instructions ol li {
+            line-height: 1.4rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .ads {
+            text-align: center;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Roboto", Arial, SansSerif;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="instructions">
+    <h3><a href="/">Back to LeafyJava</a></h3>
+    <h3>How to Use Measure Tool in Google Maps API</h3>
+    <ol>
+        <li>To <strong>start</strong> measuring, <em>right click</em> the map and choose “<em>Measure distance</em>”.</li>
+        <li><em>Left click</em> the map, and the measurement between the two locations will display.
+            Keep clicking to add more measurement waypoints.</li>
+        <li>To <strong>remove</strong> a waypoint, <em>left click</em> on the waypoint <em>(the first point cannot be removed)</em>.</li>
+        <li>To <strong>insert</strong> a waypoint on the measurement line, <em>left click</em> the line.
+            Waypoints can be moved by clicking and dragging them.</li>
+        <li>When the <em>first point</em> and the <em>last point</em> are close enough, the <strong>area</strong> will display.</li>
+        <li>To <strong>end</strong> measuring, <em>right click</em> the map and choose “<em>Clear measurement</em>”.</li>
+    </ol>
+    <p>
+        Visit <a target="_blank" href="https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3" title="Project site">the project page</a> to find out more <strong>advanced</strong> use.
+    </p>
+    <hr/>
+    <p class="ads">
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- projects-400_90 -->
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:400px;height:90px"
+             data-ad-client="ca-pub-8278949857814993"
+             data-ad-slot="7063050037"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/measuretool-googlemaps-v3/lib/MeasureTool.min.js"></script>
+<script>
+	var map, measureTool;
+	function initMap() {
+		map = new google.maps.Map(document.getElementById('map'), {
+			center: {lat: 38.9114958, lng: -110.0493177},
+			zoom: 7,
+			scaleControl: true
+		});
+		measureTool = new MeasureTool(map, {
+			unit: MeasureTool.UnitTypeId.IMPERIAL
+		});
+	}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap" async defer></script>
+
+</body>
+</html>
