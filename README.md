@@ -12,7 +12,7 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 - Support most modern browsers (Chrome, Firefox, Safari, Edge, IE11)
 
 ## Demo
-[Visit demo page](https://www.leafyjava.com/projects/measuretool)
+[Visit demo page](https://zhenyanghua.github.com/MeasureTool-GoogleMaps-V3)
 
 ![demo screen shot](https://raw.githubusercontent.com/zhenyanghua/MeasureTool-GoogleMaps-V3/master/demo.jpg)
 
