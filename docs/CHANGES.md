@@ -1,4 +1,8 @@
 # Changes
+## v0.4.2
+*Released on 08/02/2019*
+- **[Bug Fix]** Removed redraw when map extent change event, so no duplicated measurement is drawn when the map projection spans over multiple worlds.
+
 ## v0.4.0
 *Released on 11/12/2018*
 - **[Enhancement]**  Expose getters for segments and points of measurements. [#45](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/issues/45)

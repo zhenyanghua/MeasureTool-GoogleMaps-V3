@@ -145,7 +145,7 @@ export default class MeasureTool {
 
     }
     this._mapClickEvent.remove();
-    this._mapZoomChangedEvent.remove();
+    // this._mapZoomChangedEvent.remove();
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
