@@ -121,7 +121,7 @@ export default class MeasureTool {
     }
 
     this._mapClickEvent = this._map.addListener('click', mouseEvent => this._checkClick(mouseEvent));
-    this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
+    // this._mapZoomChangedEvent = this._map.addListener('zoom_changed', () => this._redrawOverlay());
     this._map.setOptions({draggableCursor: 'default'});
     this._started = true;
 
