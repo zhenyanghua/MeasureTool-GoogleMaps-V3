@@ -2,8 +2,9 @@ kind: pipeline
 name: default
 
 steps:
-- name: test
+- name: build
   image: node:10.16
   commands:
+  - rm -rf lib
   - npm install
   - npm run build
