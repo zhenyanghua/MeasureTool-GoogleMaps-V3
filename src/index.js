@@ -2,7 +2,7 @@ import css from 'index.scss';
 import {Config} from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
-import {select, event} from 'd3-selection';
+import {select, selectAll, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
 import {Geometry} from 'geometry';
 import {Segment} from 'segment';
@@ -292,7 +292,7 @@ export default class MeasureTool {
   }
 
   _onRemoveOverlay() {
-    select(`.${Config.prefix}-measure-points-${this._id}`).remove();
+    selectAll(`.${Config.prefix}-measure-points-${this._id}`).remove();
   }
 
   /**
