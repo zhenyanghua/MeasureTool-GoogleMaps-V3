@@ -1,5 +1,5 @@
 import {Config} from './config';
-import css from 'context-menu.scss';
+import css from './context-menu.scss';
 
 export default class ContextMenu {
 

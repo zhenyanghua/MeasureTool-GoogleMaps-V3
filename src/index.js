@@ -1,17 +1,17 @@
-import css from 'index.scss';
+import {drag} from 'd3-drag';
+import {select, selectAll, event} from 'd3-selection';
 import {Config} from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
-import {select, selectAll, event} from 'd3-selection';
 import ProjectionUtility from './projection-utility';
-import {Geometry} from 'geometry';
-import {Segment} from 'segment';
-import {drag} from 'd3-drag';
+import {Geometry} from './geometry';
+import {Segment} from './segment';
 import Helper from './helper';
 import {UnitTypeId} from './UnitTypeId';
 import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
 import {ObjectAssign} from './polyfills';
 import {deepClone} from "./utils";
+import css from './index.scss';
 
 export default class MeasureTool {
 

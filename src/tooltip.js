@@ -1,5 +1,5 @@
 import {Config} from './config';
-import css from 'tooltip.scss';
+import css from './tooltip.scss';
 
 export default class Tooltip {
   constructor(div) {
