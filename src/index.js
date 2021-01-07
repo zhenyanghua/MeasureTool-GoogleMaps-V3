@@ -382,9 +382,11 @@ export default class MeasureTool {
         self._onOutCircle(d, this);
       })
       .on("touchstart", function (event, [d, i]) {
+        event.preventDefault();
         self._onOverCircle(d, i, this);
       })
       .on("touchend", function (event, [d]) {
+        event.preventDefault();
         self._onOutCircle(d, this);
       })
       .on("mousedown", () => this._hideTooltip())
