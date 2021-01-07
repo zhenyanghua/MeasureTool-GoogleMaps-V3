@@ -383,7 +383,7 @@ export default class MeasureTool {
       })
       .on("touchstart", function (event, [d, i]) {
         event.preventDefault();
-        self._onOverCircle(d, i, this);
+        self._onOverCircle(d, i, this, true);
       })
       .on("touchend", function (event, [d]) {
         event.preventDefault();
@@ -408,7 +408,7 @@ export default class MeasureTool {
       })
       .on("touchstart", function (event, [d, i]) {
         event.preventDefault();
-        self._onOverCircle(d, i, this);
+        self._onOverCircle(d, i, this, true);
       })
       .on("touchend", function (event, [d]) {
         event.preventDefault();
@@ -574,10 +574,10 @@ export default class MeasureTool {
     text.exit().remove();
   }
 
-  _onOverCircle(d, i, target) {
+  _onOverCircle(d, i, target, isTouch = false) {
     if (this._dragging) return;
     select(target).attr("r", 6);
-    if (this._options.tooltip) {
+    if (this._options.tooltip && !isTouch) {
       this._tooltip.show(
         this._projectionUtility.latLngToContainerPoint(d),
         i === 0 ? Config.tooltipText2 : Config.tooltipText1
