@@ -3,10 +3,17 @@ import babel from 'rollup-plugin-babel';
 import styles from 'rollup-plugin-styles';
 import pkg from './package.json';
 
+function onwarn (warning, warn) {
+  if (warning.code === 'CIRCULAR_DEPENDENCY') {
+    return;
+  }
+  warn(warning);
+}
+
 const umd = {
   input: 'src/index.js',
   output: {
-    name: 'gmaps-measuretool',
+    name: 'MeasureTool',
     file: pkg.browser,
     format: 'umd'
   },
@@ -16,7 +23,8 @@ const umd = {
       exclude: ['node_modules/**']
     }),
     styles()
-  ]
+  ],
+  onwarn
 };
 
 const esm = {
@@ -24,14 +32,17 @@ const esm = {
   external: ['gmaps-measuretool'],
   output: {
     file: pkg.module,
-    format: 'es'
+    format: 'es',
+    sourcemap: true
   },
   plugins: [
+    resolve(),
     babel({
       exclude: ['node_modules/**']
     }),
     styles()
-  ]
+  ],
+  onwarn
 };
 
 export default [umd, esm];

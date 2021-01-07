@@ -1,5 +1,5 @@
 import {drag} from 'd3-drag';
-import {select, selectAll, event} from 'd3-selection';
+import {select, selectAll, selection} from 'd3-selection';
 import {Config} from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
@@ -11,7 +11,9 @@ import {UnitTypeId} from './UnitTypeId';
 import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
 import {ObjectAssign} from './polyfills';
 import {deepClone} from "./utils";
-import css from './index.scss';
+import './index.scss';
+
+const idx = (target) => selection.nodes().indexOf(target);
 
 export default class MeasureTool {
 
@@ -308,7 +310,7 @@ export default class MeasureTool {
 
   _checkClick(mouseEvent){
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
-    if(!this._dragged && this._nodeCircles.selectAll('circle[r="6"]').size() == 0 &&
+    if(!this._dragged && this._nodeCircles.selectAll('circle[r="6"]').size() === 0 &&
        !this._hoverCircle.select("circle").attr('cx')) {
       const node = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
       this._geometry.addNode(node);
@@ -322,14 +324,16 @@ export default class MeasureTool {
     // join with old data
     let circles = this._nodeCircles.selectAll("circle")
       .data(this._geometry ? this._geometry.nodes : [])
-        .attr('class', (d, i) => i === 0 ? 'cover-circle head-circle' : 'cover-circle')
+      .join("circle")
+      .datum((d, i) => [d, i])
+        .attr('class', ([, i]) => i === 0 ? 'cover-circle head-circle' : 'cover-circle')
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d, i){ self._onOverCircle(d, i, this);})
-        .on('mouseout', function(d){ self._onOutCircle(d, this);})
-        .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
-        .on('touchleave', function(d){ self._onOutCircle(d, this);})
+        .on('mouseover', function(event, d){ self._onOverCircle(d, i, this);})
+        .on('mouseout', function(event, d){ self._onOutCircle(d, this);})
+        .on('touchstart', function(event, d){ self._onOverCircle(d, i, this);})
+        .on('touchleave', function(event, d){ self._onOutCircle(d, this);})
         .on('mousedown', () => this._hideTooltip())
         .call(this._onDragCircle());
 
@@ -341,10 +345,10 @@ export default class MeasureTool {
         .attr('r', 5)
         .attr('cx', d => this._projectionUtility.latLngToSvgPoint(d)[0])
         .attr('cy', d => this._projectionUtility.latLngToSvgPoint(d)[1])
-        .on('mouseover', function(d, i){ self._onOverCircle(d, i, this);})
-        .on('mouseout', function(d){ self._onOutCircle(d, this);})
-        .on('touchstart', function(d, i){ self._onOverCircle(d, i, this);})
-        .on('touchleave', function(d){ self._onOutCircle(d, this);})
+        .on('mouseover', function(event, d){ self._onOverCircle(d, i, this);})
+        .on('mouseout', function(event, d){ self._onOutCircle(d, this);})
+        .on('touchstart', function(event, d){ self._onOverCircle(d, i, this);})
+        .on('touchleave', function(event, d){ self._onOutCircle(d, this);})
         .on('mousedown', () => this._hideTooltip())
         .call(this._onDragCircle());
 
@@ -384,7 +388,7 @@ export default class MeasureTool {
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
         .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
         .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
-      .on('mousemove', d => {
+      .on('mousemove', (event, d) => {
         let point = Helper.findTouchPoint(
           [this._projectionUtility.latLngToSvgPoint(d[0]), this._projectionUtility.latLngToSvgPoint(d[1])],
           [event.offsetX,  event.offsetY]);
@@ -402,7 +406,7 @@ export default class MeasureTool {
         .attr('y1', d => this._projectionUtility.latLngToSvgPoint(d[0])[1])
         .attr('x2', d => this._projectionUtility.latLngToSvgPoint(d[1])[0])
         .attr('y2', d => this._projectionUtility.latLngToSvgPoint(d[1])[1])
-        .on('mousemove', d => {
+        .on('mousemove', (event, d) => {
           let point = Helper.findTouchPoint(
             [this._projectionUtility.latLngToSvgPoint(d[0]), this._projectionUtility.latLngToSvgPoint(d[1])],
             [event.offsetX,  event.offsetY]);
@@ -496,31 +500,31 @@ export default class MeasureTool {
     let isDragged = false;
 
     let circleDrag = drag()
-      .on('drag', function (d, i) {
+      .on('drag', function (event, d, i) {
         isDragged = true;
         self._dragging = true;
 
         select(this)
           .attr('cx', event.x)
           .attr('cy', event.y);
-        self._updateLinePosition.call(self, self._linesBase, i);
-        self._updateLinePosition.call(self, self._linesAux, i);
+        self._updateLinePosition.call(self, self._linesBase, i, event);
+        self._updateLinePosition.call(self, self._linesAux, i, event);
         if (self._options.showSegmentLength) {
-          self._updateSegmentTextPosition(i);
+          self._updateSegmentTextPosition(i, event);
         }
         if (self._options.showAccumulativeLength) {
-          self._updateNodeTextPosition(i);
+          self._updateNodeTextPosition(i, event);
         }
         self._updateArea(i, self._projectionUtility.svgPointToLatLng([event.x, event.y]));
       });
 
-    circleDrag.on('start', function(d) {
+    circleDrag.on('start', function(event) {
       event.sourceEvent.stopPropagation();
       select(this).raise().attr('r', 6);
       self._disableMapScroll();
     });
 
-    circleDrag.on('end', function (d, i) {
+    circleDrag.on('end', function (event, d, i) {
       self._enableMapScroll();
       if (!isDragged) {
         if (i > 0) {
@@ -534,7 +538,7 @@ export default class MeasureTool {
         self._geometry.updateNode(
           i,
           self._projectionUtility.svgPointToLatLng([event.x, event.y]));
-        self._showTooltipOnEvent(i === 0 ? Config.tooltipText2 : Config.tooltipText1);
+        self._showTooltipOnEvent(i === 0 ? Config.tooltipText2 : Config.tooltipText1, event);
       }
       isDragged = false;
       self._dragging = false;
@@ -547,7 +551,7 @@ export default class MeasureTool {
   _onDragLine() {
     let isDragged = false;
     let lineDrag = drag()
-      .on('drag', (d, i) => {
+      .on('drag', (event, d, i) => {
         this._dragging = true;
         if (!isDragged) {
           isDragged = true;
@@ -563,25 +567,25 @@ export default class MeasureTool {
           }
         }
         this._updateHoverCirclePosition(event.x, event.y);
-        this._updateLinePosition(this._linesBase, i + 1);
-        this._updateLinePosition(this._linesAux, i + 1);
+        this._updateLinePosition(this._linesBase, i + 1, event);
+        this._updateLinePosition(this._linesAux, i + 1, event);
         if (this._options.showSegmentLength) {
-          this._updateSegmentTextPosition(i + 1);
+          this._updateSegmentTextPosition(i + 1, event);
         }
         if (this._options.showAccumulativeLength) {
-          this._updateNodeTextPosition(i + 1);
+          this._updateNodeTextPosition(i + 1, event);
         }
         this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       });
 
-    lineDrag.on('start', () => {
+    lineDrag.on('start', (event) => {
       event.sourceEvent.stopPropagation();
       this._hoverCircle.select("circle")
         .attr('class', "cover-circle");
       this._disableMapScroll();
     });
 
-    lineDrag.on('end', (d, i) => {
+    lineDrag.on('end', (event, d, i) => {
       this._enableMapScroll();
       if (isDragged) {
         this._geometry.updateNode(
@@ -590,7 +594,7 @@ export default class MeasureTool {
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
-        this._showTooltipOnEvent(Config.tooltipText1);
+        this._showTooltipOnEvent(Config.tooltipText1, event);
       }
       this._updateArea(i + 1, this._projectionUtility.svgPointToLatLng([event.x, event.y]));
       this._hoverCircle.select("circle")
@@ -601,7 +605,7 @@ export default class MeasureTool {
     return lineDrag;
   }
 
-  _updateLinePosition(group, i) {
+  _updateLinePosition(group, i, event) {
     if (i < this._geometry.lines.length) {
       group.select(`line:nth-child(${i + 1})`)
         .attr('x1', event.x)
@@ -614,7 +618,7 @@ export default class MeasureTool {
     }
   }
 
-  _updateSegmentTextPosition(index) {
+  _updateSegmentTextPosition(index, event) {
     if (index < this._geometry.lines.length) {
       this._segmentText.select(`text:nth-child(${index + 1})`)
         .attr('transform', d => {
@@ -637,7 +641,7 @@ export default class MeasureTool {
     }
   }
 
-  _updateNodeTextPosition(index) {
+  _updateNodeTextPosition(index, event) {
     this._nodeText.select(`text:nth-child(${index + 1})`)
       .attr('x', event.x)
       .attr('y', () => {
@@ -754,7 +758,7 @@ export default class MeasureTool {
     }
   }
 
-  _showTooltipOnEvent(text) {
+  _showTooltipOnEvent(text, event) {
     if (this._options.tooltip) {
       this._tooltip.show(this._projectionUtility.svgPointToContainerPoint([event.x, event.y]), text);
     }

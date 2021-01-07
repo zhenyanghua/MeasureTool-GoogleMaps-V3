@@ -32,14 +32,15 @@
       left: 10px;
     }
   </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry"></script>
 </head>
 <body>
 <div id="map"></div>
-<button id="start-with-points" onclick="measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}])">Start With Initial Points</button>
-<button id="start" onclick="measureTool.start()">Start</button>
-<button id="end" onclick="measureTool.end()">End</button>
-<script src="../dist/gmaps-measuretool.umd.js"></script>
-<script>
+<button id="start-with-points">Start With Initial Points</button>
+<button id="start">Start</button>
+<button id="end">End</button>
+<script type="module">
+  import MeasureTool from "../dist/gmaps-measuretool.esm.js";
   var map, measureTool;
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -88,9 +89,13 @@
 //      measureTool.removeListener('measure_change');
     });
   }
+  initMap()
+  document.querySelector('#start-with-points')
+          .addEventListener('click', () => measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}]));
+  document.querySelector('#start')
+    .addEventListener('click', () => measureTool.start());
+  document.querySelector('#end')
+    .addEventListener('click', () => measureTool.end());
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap"
-        async defer></script>
-
 </body>
 </html>
