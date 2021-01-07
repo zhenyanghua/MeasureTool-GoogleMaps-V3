@@ -4,37 +4,40 @@
  * @param item
  * @return {*}
  */
-export const deepClone = item => {
-  if (!item) { return item; } // null, undefined values check
+export const deepClone = (item) => {
+  if (!item) {
+    return item;
+  } // null, undefined values check
 
-  let types = [ Number, String, Boolean ],
+  let types = [Number, String, Boolean],
     result;
 
   // normalizing primitives if someone did new String('aaa'), or new Number('444');
-  types.forEach(function(type) {
+  types.forEach(function (type) {
     if (item instanceof type) {
-      result = type( item );
+      result = type(item);
     }
   });
 
   if (typeof result === "undefined") {
-    if (Object.prototype.toString.call( item ) === "[object Array]") {
+    if (Object.prototype.toString.call(item) === "[object Array]") {
       result = [];
-      item.forEach(function(child, index, array) {
-        result[index] = deepClone( child );
+      item.forEach(function (child, index, array) {
+        result[index] = deepClone(child);
       });
     } else if (typeof item === "object") {
       // testing that this is DOM
       if (item.nodeType && typeof item.cloneNode === "function") {
-        result = item.cloneNode( true );
-      } else if (!item.prototype) { // check that this is a literal
+        result = item.cloneNode(true);
+      } else if (!item.prototype) {
+        // check that this is a literal
         if (item instanceof Date) {
           result = new Date(item);
         } else {
           // it is an object literal
           result = {};
           for (let i in item) {
-            result[i] = deepClone( item[i] );
+            result[i] = deepClone(item[i]);
           }
         }
       } else {
@@ -59,10 +62,10 @@ export const detectFeature = () => {
   // Test via a getter in the options object to see if the passive property is accessed
   let supportsPassive = false;
   try {
-    const opts = Object.defineProperty({}, 'passive', {
-      get: function() {
+    const opts = Object.defineProperty({}, "passive", {
+      get: function () {
         supportsPassive = true;
-      }
+      },
     });
     window.addEventListener("testPassive", null, opts);
     window.removeEventListener("testPassive", null, opts);

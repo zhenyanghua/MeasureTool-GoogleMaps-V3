@@ -1,6 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import styles from 'rollup-plugin-styles';
+import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 function onwarn (warning, warn) {
@@ -22,18 +23,18 @@ const umd = {
     babel({
       exclude: ['node_modules/**']
     }),
-    styles()
+    styles(),
+    terser()
   ],
   onwarn
 };
 
 const esm = {
   input: 'src/index.js',
-  external: ['gmaps-measuretool'],
+  external: ['MeasureTool'],
   output: {
     file: pkg.module,
-    format: 'es',
-    sourcemap: true
+    format: 'es'
   },
   plugins: [
     resolve(),

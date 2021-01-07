@@ -1,5 +1,7 @@
 export class Geometry {
-  get nodes() { return this._nodes; }
+  get nodes() {
+    return this._nodes;
+  }
   get lines() {
     let segments = [];
     if (this._nodes.length > 1) {

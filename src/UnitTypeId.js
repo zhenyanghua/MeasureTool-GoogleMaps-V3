@@ -1,5 +1,5 @@
-export const UnitTypeId  = {
-  METRIC: 'metric',
-  IMPERIAL: 'imperial',
-  NAUTICAL: 'nautical'
+export const UnitTypeId = {
+  METRIC: "metric",
+  IMPERIAL: "imperial",
+  NAUTICAL: "nautical",
 };
