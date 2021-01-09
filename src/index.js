@@ -105,7 +105,7 @@ export default class MeasureTool {
   }
 
   _bindToggleContextMenu() {
-    this._map.addListener('rightclick', (mouseEvent) => {
+    this._map.addListener('contextmenu', (mouseEvent) => {
       this._firstClick = mouseEvent;
       this._contextMenu.show(
         this._projection.fromLatLngToContainerPixel(mouseEvent.latLng)
@@ -675,6 +675,7 @@ export default class MeasureTool {
           this._updateNodeText();
         }
       }
+      this._updateHoverCirclePosition(event.x, event.y);
       this._updateLinePosition(this._lineDrag, i + 1, event);
       if (this._options.showSegmentLength) {
         this._updateSegmentTextPosition(i + 1, event);
@@ -711,7 +712,8 @@ export default class MeasureTool {
         this._projectionUtility.svgPointToLatLng([event.x, event.y])
       );
       this._hoverCircle.select('circle').attr('class', 'grey-circle');
-      this._linesBase.selectAll('line').attr('class', 'base-line');
+      this._linesBase.selectAll('line').style('display', 'inline');
+      this._linesAux.selectAll('line').style('display', 'inline');
       this._dragging = false;
     });
 
