@@ -35,6 +35,7 @@
 |**showSegmentLength**|Type: `boolean` - display segment length along the path. Enabled by default.|
 |**tooltip**|Type: `boolean` - display tooltip when hover the drawing path. Enabled by default.|
 |**unit**|Type: `UnitTypeId` - the unit type to use for the measured length and area. Defaults to `MeasureTool.UnitTypeId.METRIC`.|
+|**language**|Type: `string` - the standard language locale. It could be either language or language with locale, e.g. 'en', 'en-US' are both fine. Default using the browser's language.|
 
 ### MeasureEvent object specification
 |Properties|Description|

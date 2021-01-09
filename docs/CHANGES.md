@@ -1,6 +1,10 @@
 # Changes
 ## v1.0.0
+*Released on 01/xx/2021*
 What has changed?
+- **[Enhancement]**
+  - Added support for mobile devices and touch screen.
+  - Added i18n support.
 - **[Dependencies]** 
   - Upgraded `d3-selection` and `d3-drag` to v2, which uses local event management.
 - **[Development]** 

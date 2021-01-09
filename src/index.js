@@ -41,6 +41,10 @@ export default class MeasureTool {
     );
   }
 
+  set language(langCode) {
+    this._options.language = langCode;
+  }
+
   static get UnitTypeId() {
     return UnitTypeId;
   }
@@ -60,8 +64,9 @@ export default class MeasureTool {
       tooltip: true,
       unit: UnitTypeId.METRIC,
       initialSegments: [],
+      language: navigator ? navigator.language : 'en',
+      ...options,
     };
-    Object.assign(this._options, options);
     this._map = map;
     this._map.setClickableIcons(false);
     this._id = Helper.makeId(4);
@@ -105,6 +110,18 @@ export default class MeasureTool {
   }
 
   _bindToggleContextMenu() {
+    this._containerDiv.addEventListener('touchstart', (touchEvent) => {
+      console.debug('touched', touchEvent);
+      if (touchEvent.targetTouches.length === 2) {
+        console.debug('2 finger touches');
+      }
+    });
+    this._containerDiv.addEventListener('touchend', (touchEvent) => {
+      console.debug('touch end', touchEvent);
+      if (touchEvent.targetTouches.length === 2) {
+        console.debug('2 finger touches');
+      }
+    });
     this._map.addListener('contextmenu', (mouseEvent) => {
       this._firstClick = mouseEvent;
       this._contextMenu.show(
@@ -112,7 +129,7 @@ export default class MeasureTool {
       );
     });
     document.addEventListener('keydown', (event) => {
-      if (event.which === 27) {
+      if (event.key === 'Escape' || event.which === 27) {
         this._contextMenu.hide();
       }
     });
@@ -188,7 +205,6 @@ export default class MeasureTool {
       );
     }
     this._mapClickEvent.remove();
-    // this._mapZoomChangedEvent.remove();
     this._geometry = new Geometry();
     this._onRemoveOverlay();
     this._setOverlay();
@@ -570,7 +586,9 @@ export default class MeasureTool {
     if (this._options.tooltip && !isTouch) {
       this._tooltip.show(
         this._projectionUtility.latLngToContainerPoint(d),
-        i === 0 ? Config.tooltipText2 : Config.tooltipText1
+        i === 0
+          ? Config.tooltipText2(this._options.language)
+          : Config.tooltipText1(this._options.language)
       );
     }
   }
@@ -625,7 +643,9 @@ export default class MeasureTool {
           self._projectionUtility.svgPointToLatLng([event.x, event.y])
         );
         self._showTooltipOnEvent(
-          i === 0 ? Config.tooltipText2 : Config.tooltipText1,
+          i === 0
+            ? Config.tooltipText2(self._options.language)
+            : Config.tooltipText1(self._options.language),
           event
         );
       }
@@ -705,7 +725,10 @@ export default class MeasureTool {
         this._hideHoverCircle();
         this._overlay.draw();
         isDragged = false;
-        this._showTooltipOnEvent(Config.tooltipText1, event);
+        this._showTooltipOnEvent(
+          Config.tooltipText1(this._options.language),
+          event
+        );
       }
       this._updateArea(
         i + 1,
@@ -824,7 +847,7 @@ export default class MeasureTool {
     if (this._options.tooltip) {
       this._tooltip.show(
         this._projectionUtility.svgPointToContainerPoint([x, y]),
-        Config.tooltipText2
+        Config.tooltipText2(this._options.language)
       );
     }
   }
