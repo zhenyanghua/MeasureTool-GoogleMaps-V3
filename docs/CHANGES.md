@@ -1,7 +1,6 @@
 # Changes
 ## v1.0.0
-*Released on 01/xx/2021*
-What has changed?
+*Released on 01/09/2021*
 - **[Enhancement]**
   - Added support for mobile devices and touch screen.
   - Added i18n support.
