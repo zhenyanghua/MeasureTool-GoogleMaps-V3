@@ -17,18 +17,23 @@ export default class MeasureTool {
   get lengthText() {
     return this._helper.formatLength(this._length || 0);
   }
+
   get areaText() {
     return this._helper.formatArea(this._area || 0);
   }
+
   get length() {
     return this._length || 0;
   }
+
   get area() {
     return this._area || 0;
   }
+
   get segments() {
     return deepClone(this._segments) || [];
   }
+
   get points() {
     return (
       deepClone(this._geometry.nodes.map((x) => ({ lat: x[1], lng: x[0] }))) ||
@@ -61,6 +66,7 @@ export default class MeasureTool {
     this._map.setClickableIcons(false);
     this._id = Helper.makeId(4);
     this._events = new Map();
+    this._geometry = new Geometry();
     this._init();
   }
 
@@ -265,36 +271,29 @@ export default class MeasureTool {
       .attr("class", `${Config.prefix}-svg-overlay`);
 
     this._linesBase = this._svgOverlay.append("g").attr("class", "base");
-    this._linesBase
-      .selectAll("line")
-      .data(this._geometry ? this._geometry.lines : []);
+    this._linesBase.selectAll("line").data(this._geometry.lines);
 
     this._linesAux = this._svgOverlay.append("g").attr("class", "aux");
-    this._linesAux
-      .selectAll("line")
-      .data(this._geometry ? this._geometry.lines : []);
+    this._linesAux.selectAll("line").data(this._geometry.lines);
+
+    this._lineDrag = this._svgOverlay.append("g").attr("class", "drag");
+    this._lineDrag.selectAll("line").data(this._geometry.lines);
 
     this._nodeCircles = this._svgOverlay
       .append("g")
       .attr("class", "node-circle");
-    this._nodeCircles
-      .selectAll("circle")
-      .data(this._geometry ? this._geometry.nodes : []);
+    this._nodeCircles.selectAll("circle").data(this._geometry.nodes);
 
     if (this._options.showSegmentLength) {
       this._segmentText = this._svgOverlay
         .append("g")
         .attr("class", "segment-text");
-      this._segmentText
-        .selectAll("text")
-        .data(this._geometry ? this._geometry.lines : []);
+      this._segmentText.selectAll("text").data(this._geometry.lines);
     }
 
     if (this._options.showAccumulativeLength) {
       this._nodeText = this._svgOverlay.append("g").attr("class", "node-text");
-      this._nodeText
-        .selectAll("text")
-        .data(this._geometry ? this._geometry.nodes : []);
+      this._nodeText.selectAll("text").data(this._geometry.nodes);
     }
 
     this._hoverCircle = this._svgOverlay
@@ -366,7 +365,7 @@ export default class MeasureTool {
     // join with old data
     let circles = this._nodeCircles
       .selectAll("circle")
-      .data(this._geometry ? this._geometry.nodes : [])
+      .data(this._geometry.nodes)
       .join("circle")
       .datum((d, i) => [d, i])
       .attr("class", ([, i]) =>
@@ -425,7 +424,7 @@ export default class MeasureTool {
 
     let linesBase = this._linesBase
       .selectAll("line")
-      .data(this._geometry ? this._geometry.lines : [])
+      .data(this._geometry.lines)
       .attr("class", "base-line")
       .attr("x1", (d) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
       .attr("y1", (d) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
@@ -433,6 +432,7 @@ export default class MeasureTool {
       .attr("y2", (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
       .each((d) => this._updateSegment(d));
 
+    linesBase.exit().remove();
     linesBase
       .enter()
       .append("line")
@@ -443,18 +443,18 @@ export default class MeasureTool {
       .attr("y2", (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
       .each((d) => this._updateSegment(d));
 
-    linesBase.exit().remove();
-
     let linesAux = this._linesAux
       .selectAll("line")
-      .data(this._geometry ? this._geometry.lines : [])
+      .data(this._geometry.lines)
       .join("line")
       .datum((d, i) => [d, i])
       .attr("class", "aux-line")
       .attr("x1", ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
       .attr("y1", ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
       .attr("x2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr("y2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+      .attr("y2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+
+    linesAux
       .on("mousemove", (event, [d]) => {
         let point = Helper.findTouchPoint(
           [
@@ -467,8 +467,9 @@ export default class MeasureTool {
       })
       .on("mouseout", () => this._hideHoverCircle())
       .on("mousedown", () => this._hideTooltip())
-      .call(this._onDragLine());
+      .call(this._onDragLine(linesAux, linesBase));
 
+    linesAux.exit().remove();
     linesAux
       .enter()
       .append("line")
@@ -478,28 +479,17 @@ export default class MeasureTool {
       .attr("x1", ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
       .attr("y1", ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
       .attr("x2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr("y2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
-      .on("mousemove", (event, [d]) => {
-        let point = Helper.findTouchPoint(
-          [
-            this._projectionUtility.latLngToSvgPoint(d[0]),
-            this._projectionUtility.latLngToSvgPoint(d[1]),
-          ],
-          [event.offsetX, event.offsetY]
-        );
-        this._updateHoverCirclePosition(point[0], point[1]);
-      })
-      .on("mouseout", () => this._hideHoverCircle())
-      .on("mousedown", () => this._hideTooltip())
-      .call(this._onDragLine());
+      .attr("y2", ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
 
-    linesAux.exit().remove();
+    const lineDrag = this._lineDrag.selectAll("line").data([]);
+
+    lineDrag.exit().remove();
   }
 
   _updateSegmentText() {
     let text = this._segmentText
       .selectAll("text")
-      .data(this._geometry ? this._geometry.lines : [])
+      .data(this._geometry.lines)
       .attr("class", "segment-measure-text")
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "text-before-edge")
@@ -533,7 +523,7 @@ export default class MeasureTool {
   _updateNodeText() {
     let text = this._nodeText
       .selectAll("text")
-      .data(this._geometry ? this._geometry.nodes : [])
+      .data(this._geometry.nodes)
       .attr("class", (d, i) =>
         i === 0 ? "node-measure-text head-text" : "node-measure-text"
       )
@@ -647,17 +637,36 @@ export default class MeasureTool {
     return circleDrag;
   }
 
-  _onDragLine() {
+  _onDragLine(aux, base) {
     let isDragged = false;
     let lineDrag = drag().on("drag", (event, [, i]) => {
       this._dragging = true;
       if (!isDragged) {
         isDragged = true;
+
+        // idea - The problems seems that we can't rejoin the data on the same selection during the drag,
+        // but we can use the new data to create a new line just to show during the drag by passing the drag event to it.
         this._geometry.insertNode(
           i + 1,
           this._projectionUtility.svgPointToLatLng([event.x, event.y])
         );
-        this._updateLine();
+
+        const lineDrag = this._lineDrag
+          .selectAll("line")
+          .data(this._geometry.lines);
+
+        lineDrag.exit().remove();
+        lineDrag
+          .enter()
+          .append("line")
+          .attr("class", "base-line")
+          .attr("x1", (d) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
+          .attr("y1", (d) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
+          .attr("x2", (d) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
+          .attr("y2", (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+
+        this._linesBase.selectAll("line").attr("class", "hidden");
+
         if (this._options.showSegmentLength) {
           this._updateSegmentText();
         }
@@ -665,7 +674,7 @@ export default class MeasureTool {
           this._updateNodeText();
         }
       }
-      this._updateHoverCirclePosition(event.x, event.y);
+      this._updateLinePosition(this._lineDrag, i + 1, event);
       this._updateLinePosition(this._linesBase, i + 1, event);
       this._updateLinePosition(this._linesAux, i + 1, event);
       if (this._options.showSegmentLength) {
@@ -703,6 +712,7 @@ export default class MeasureTool {
         this._projectionUtility.svgPointToLatLng([event.x, event.y])
       );
       this._hoverCircle.select("circle").attr("class", "grey-circle");
+      this._linesBase.selectAll("line").attr("class", "base-line");
       this._dragging = false;
     });
 
@@ -915,6 +925,10 @@ export default class MeasureTool {
   }
 
   _showTooltipOnEvent(text, event) {
+    // don't show tooltip in a touch event
+    if (event.sourceEvent.type.startsWith("touch")) {
+      return;
+    }
     if (this._options.tooltip) {
       this._tooltip.show(
         this._projectionUtility.svgPointToContainerPoint([event.x, event.y]),

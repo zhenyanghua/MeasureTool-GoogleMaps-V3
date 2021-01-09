@@ -28,6 +28,10 @@ $opaque-white: rgba(255, 255, 255, 0.4);
   //}
 }
 
+.hidden {
+  display: none;
+}
+
 .base-line {
   fill: none;
   stroke: black;

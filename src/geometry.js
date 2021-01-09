@@ -1,6 +1,6 @@
 export class Geometry {
   get nodes() {
-    return this._nodes;
+    return Object.assign([], this._nodes);
   }
   get lines() {
     let segments = [];
