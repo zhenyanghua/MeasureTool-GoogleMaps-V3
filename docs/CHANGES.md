@@ -5,6 +5,7 @@ What has changed?
 - **[Enhancement]**
   - Added support for mobile devices and touch screen.
   - Added i18n support.
+  - Added an option to invert color.
 - **[Dependencies]** 
   - Upgraded `d3-selection` and `d3-drag` to v2, which uses local event management.
 - **[Development]** 

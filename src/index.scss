@@ -1,4 +1,5 @@
-$opaque-white: rgba(255, 255, 255, 0.4);
+$alpha-white: rgba(255, 255, 255, 0.4);
+$alpha-black: rgba(0, 0, 0, 1);
 
 .measure-tool-svg-overlay {
   position: absolute;
@@ -8,7 +9,6 @@ $opaque-white: rgba(255, 255, 255, 0.4);
   height: 8000px;
 }
 
-.dragging-circle,
 .cover-circle {
   fill: white;
   stroke: black;
@@ -29,6 +29,9 @@ $opaque-white: rgba(255, 255, 255, 0.4);
   fill: none;
   stroke: black;
   stroke-width: 2.5px;
+  &.inverted {
+    stroke: white;
+  }
 }
 
 .aux-line {
@@ -39,16 +42,37 @@ $opaque-white: rgba(255, 255, 255, 0.4);
 }
 
 .segment-measure-text {
-  stroke: black;
   pointer-events: none;
+  stroke: black;
+  text-shadow: -2.4px -2.4px $alpha-white, -2.4px 2.4px $alpha-white,
+  2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white,
+  -2.4px 0 $alpha-white, 0 2.4px $alpha-white, 2.4px 0 $alpha-white,
+  0 -2.4px $alpha-white;
+
+  &.inverted {
+    stroke: white;
+    text-shadow: -2.4px -2.4px $alpha-black, -2.4px 2.4px $alpha-black,
+    2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black,
+    -2.4px 0 $alpha-black, 0 2.4px $alpha-black, 2.4px 0 $alpha-black,
+    0 -2.4px $alpha-black;
+  }
 }
 
 .node-measure-text {
-  text-shadow: -1.4px -1.4px $opaque-white, -1.4px 1.4px $opaque-white,
-    1.4px 1.4px $opaque-white, 1.4px -1.4px $opaque-white,
-    -1.4px 0 $opaque-white, 0 1.4px $opaque-white, 1.4px 0 $opaque-white,
-    0 -1.4px $opaque-white;
+  stroke: black;
+  text-shadow: -2.4px -2.4px $alpha-white, -2.4px 2.4px $alpha-white,
+    2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white,
+    -2.4px 0 $alpha-white, 0 2.4px $alpha-white, 2.4px 0 $alpha-white,
+    0 -2.4px $alpha-white;
   pointer-events: none;
+
+  &.inverted {
+    stroke: white;
+    text-shadow: -2.4px -2.4px $alpha-black, -2.4px 2.4px $alpha-black,
+    2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black,
+    -2.4px 0 $alpha-black, 0 2.4px $alpha-black, 2.4px 0 $alpha-black,
+    0 -2.4px $alpha-black;
+  }
 
   &.head-text {
     visibility: hidden;

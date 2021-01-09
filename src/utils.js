@@ -73,3 +73,7 @@ export const detectFeature = () => {
 
   return supportsPassive;
 };
+
+export const getClass = (name, inverted = false) => {
+  return inverted ? `${name} inverted` : name;
+}

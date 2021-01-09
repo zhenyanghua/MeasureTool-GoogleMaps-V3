@@ -7,6 +7,7 @@ A mobile friendly measure tool for Google Maps JS API v3.
 - Measure **length** and **area** with segment details.
 - Support imperial, metric and nautical units.
 - Support multiple languages (PR is welcome for more languages).
+- color inversion for the dark/light background
 - Built-in UI for measurement for convenience.
 - API for more customizations.
 

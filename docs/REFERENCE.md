@@ -36,6 +36,7 @@
 |**tooltip**|Type: `boolean` - display tooltip when hover the drawing path. Enabled by default.|
 |**unit**|Type: `UnitTypeId` - the unit type to use for the measured length and area. Defaults to `MeasureTool.UnitTypeId.METRIC`.|
 |**language**|Type: `string` - the standard language locale. It could be either language or language with locale, e.g. 'en', 'en-US' are both fine. Default using the browser's language.|
+|**invertColor**|Type: `boolean` - indicates if the foreground and background color should be inverted.|
 
 ### MeasureEvent object specification
 |Properties|Description|
