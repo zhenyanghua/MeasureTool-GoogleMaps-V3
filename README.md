@@ -1,15 +1,16 @@
-# Measurement Tool for Google Maps API V3
+# Measurement Tool for Google Maps JS API V3
 
-A handy measurement widget for Google Maps API v3. The functionalities are implemented as close as to what current Google Maps offers.
+A mobile friendly measure tool for Google Maps JS API v3.
 
 ## Features
-- Add measurement with one line code to your Google Maps web application.
-- Measure Length and Area with segment details.
+- Mobile friendly with native browser touch events support.
+- Measure **length** and **area** with segment details.
 - Support imperial, metric and nautical units.
-- Visualize and measure predefined points or as you go.
+- Support multiple languages (PR is welcome for more languages).
+- color inversion for the dark/light background
 - Built-in UI for measurement for convenience.
 - API for more customizations.
-- Support most modern browsers (Chrome, Firefox, Safari, Edge, IE11)
+
 
 ## Demo
 [Visit demo page](https://zhenyanghua.github.com/MeasureTool-GoogleMaps-V3)
@@ -24,6 +25,16 @@ A handy measurement widget for Google Maps API v3. The functionalities are imple
 1. When the *first* point and the *last* point are close enough, the **area** will display.
 1. To **end** measuring, *right click* the map and choose **Clear measurement**.
 
+## Browser Compatibility
+- Support various latest versions of modern browsers and IE 11.
+  - Chrome
+  - Firefox
+  - Safari
+  - Edge
+  - IE11
+  - iOS Chrome
+  - iOS Safari
+    
 ## Documentations
 - [Change List](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/blob/master/docs/CHANGES.md)
 - [Developer Guide](https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3/blob/master/docs/GUIDE.md)

@@ -1,4 +1,18 @@
 # Changes
+## v1.0.0
+*Released on 01/xx/2021*
+What has changed?
+- **[Enhancement]**
+  - Added support for mobile devices and touch screen.
+  - Added i18n support.
+  - Added an option to invert color.
+- **[Dependencies]** 
+  - Upgraded `d3-selection` and `d3-drag` to v2, which uses local event management.
+- **[Development]** 
+  - Rewrote build pipeline with rollup, fixed some CSS injection security warnings.
+  - Added prettier
+  - Added module example
+
 ## v0.4.2
 *Released on 08/02/2019*
 - **[Bug Fix]** Removed redraw when map extent change event, so no duplicated measurement is drawn when the map projection spans over multiple worlds.

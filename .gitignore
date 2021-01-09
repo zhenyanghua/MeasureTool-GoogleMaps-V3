@@ -1,7 +1,5 @@
-# IntelliJ project files
 .idea
 .DS_Store
-node_modules
-npm-debug.log.*
 *.log
-lib/*.js.map
+node_modules
+dist

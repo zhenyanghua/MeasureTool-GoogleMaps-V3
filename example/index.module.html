@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Simple Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
   <style>
     /* Always set the map height explicitly to define the size of the div
@@ -24,6 +24,7 @@
       flex-direction: column;
     }
   </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry"></script>
 </head>
 <body>
 <div id="map"></div>
@@ -33,8 +34,8 @@
   <button id="end">End</button>
   <button id="invert">Invert Color</button>
 </div>
-<script src="../dist/gmaps-measuretool.umd.js"></script>
-<script>
+<script type="module">
+  import MeasureTool from "../dist/gmaps-measuretool.esm.js";
   var map, measureTool;
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -84,22 +85,19 @@
 //      measureTool.removeListener('measure_change');
     });
   }
-
+  initMap()
   let inverted = false;
   document.querySelector('#start-with-points')
-      .addEventListener('click', () => measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}]));
+          .addEventListener('click', () => measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}]));
   document.querySelector('#start')
-      .addEventListener('click', () => measureTool.start());
+    .addEventListener('click', () => measureTool.start());
   document.querySelector('#end')
-      .addEventListener('click', () => measureTool.end());
+    .addEventListener('click', () => measureTool.end());
   document.querySelector('#invert')
-      .addEventListener('click', () => {
-        inverted = !inverted
-        measureTool.setOption('invertColor', inverted);
-      });
+    .addEventListener('click', () => {
+      inverted = !inverted
+      measureTool.setOption('invertColor', inverted);
+    });
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap"
-        async defer></script>
-
 </body>
 </html>

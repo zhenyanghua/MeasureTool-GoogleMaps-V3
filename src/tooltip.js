@@ -1,5 +1,5 @@
-import {Config} from './config';
-import css from 'tooltip.scss';
+import { Config } from './config';
+import css from './tooltip.scss';
 
 export default class Tooltip {
   constructor(div) {
@@ -19,10 +19,10 @@ export default class Tooltip {
     `;
     let w = this._parentDiv.getBoundingClientRect().width;
     let h = this._parentDiv.getBoundingClientRect().height;
-    this._containerDiv.style.cssText += point.x <  w / 2 ?
-      `left: ${point.x}px;` : `right: ${w - point.x}px;`;
-    this._containerDiv.style.cssText += point.y < h / 2 ?
-      `top: ${point.y}px` : `bottom: ${h - point.y}px;`;
+    this._containerDiv.style.cssText +=
+      point.x < w / 2 ? `left: ${point.x}px;` : `right: ${w - point.x}px;`;
+    this._containerDiv.style.cssText +=
+      point.y < h / 2 ? `top: ${point.y}px` : `bottom: ${h - point.y}px;`;
     this._containerDiv.style.cssText += 'visibility: visible;';
   }
 
