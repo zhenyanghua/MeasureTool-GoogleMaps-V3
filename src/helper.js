@@ -1,4 +1,4 @@
-import { UnitTypeId } from "./UnitTypeId";
+import { UnitTypeId } from './UnitTypeId';
 export default class Helper {
   constructor(options) {
     this._options = {
@@ -45,7 +45,7 @@ export default class Helper {
   }
 
   static makeId(n) {
-    return (Math.random().toString(36) + "00000000000000000").slice(2, n + 2);
+    return (Math.random().toString(36) + '00000000000000000').slice(2, n + 2);
   }
 
   initUnits() {
@@ -130,55 +130,55 @@ export default class Helper {
   _formatLengthMetric(value) {
     let unit;
     if (value / 1000 >= 1) {
-      unit = "km";
+      unit = 'km';
       value /= 1000;
     } else {
-      unit = "m";
+      unit = 'm';
     }
-    return this._numberToLocale(this._roundUp(value, 2)) + " " + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatLengthImperial(value) {
     let unit;
     if (value / 5280 >= 1) {
-      unit = "mi";
+      unit = 'mi';
       value /= 5280;
     } else {
-      unit = "ft";
+      unit = 'ft';
     }
-    return this._numberToLocale(this._roundUp(value, 2)) + " " + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatLengthNautical(value) {
-    let unit = "NM";
+    let unit = 'NM';
     value /= 1852;
-    return this._numberToLocale(this._roundUp(value, 2)) + " " + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatAreaMetric(value) {
     let unit;
     if (value / 1000000 >= 1) {
-      unit = "km²";
+      unit = 'km²';
       value /= 1000000;
     } else {
-      unit = "m²";
+      unit = 'm²';
     }
-    return this._numberToLocale(this._roundUp(value, 2)) + " " + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _formatAreaImperial(value) {
     let unit;
     if (value * 3.587e-8 >= 1) {
-      unit = "mi²";
+      unit = 'mi²';
       value *= 3.587e-8;
     } else {
-      unit = "ft²";
+      unit = 'ft²';
     }
-    return this._numberToLocale(this._roundUp(value, 2)) + " " + unit;
+    return this._numberToLocale(this._roundUp(value, 2)) + ' ' + unit;
   }
 
   _roundUp(value, decimals) {
-    return Number(Math.round(value + "e" + decimals) + "e-" + decimals).toFixed(
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals).toFixed(
       decimals
     );
   }

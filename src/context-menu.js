@@ -1,5 +1,5 @@
-import { Config } from "./config";
-import css from "./context-menu.scss";
+import { Config } from './config';
+import css from './context-menu.scss';
 
 export default class ContextMenu {
   get left() {
@@ -21,18 +21,18 @@ export default class ContextMenu {
     };
     this._options = Object.assign({}, this._defaultOptions, options || {});
     this._parentDiv = div;
-    this._containerDiv = document.createElement("div");
+    this._containerDiv = document.createElement('div');
     this._containerDiv.classList.add(`${Config.prefix}-context-menu`);
     this._containerDiv.stylesheet = css;
     this._containerDiv.oncontextmenu = (event) => event.preventDefault();
-    this._list = document.createElement("ul");
+    this._list = document.createElement('ul');
     this._containerDiv.appendChild(this._list);
     div.appendChild(this._containerDiv);
     this._isVisible = false;
   }
 
   addItem(name, isVisible, cb, context = this) {
-    let item = document.createElement("li");
+    let item = document.createElement('li');
     let content = document.createTextNode(name);
 
     item.appendChild(content);
@@ -77,8 +77,8 @@ export default class ContextMenu {
       this._parentDiv.getBoundingClientRect().height <= point.y + this.height;
 
     this._containerDiv.style.cssText += `
-      ${isXOverflow ? "right: 0px;" : "left: " + point.x + "px;"}
-      ${isYOverflow ? "bottom: 14px;" : "top: " + point.y + "px;"}
+      ${isXOverflow ? 'right: 0px;' : 'left: ' + point.x + 'px;'}
+      ${isYOverflow ? 'bottom: 14px;' : 'top: ' + point.y + 'px;'}
       visibility: visible;
     `;
   }

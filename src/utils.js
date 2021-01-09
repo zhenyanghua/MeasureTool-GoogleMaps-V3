@@ -19,15 +19,15 @@ export const deepClone = (item) => {
     }
   });
 
-  if (typeof result === "undefined") {
-    if (Object.prototype.toString.call(item) === "[object Array]") {
+  if (typeof result === 'undefined') {
+    if (Object.prototype.toString.call(item) === '[object Array]') {
       result = [];
       item.forEach(function (child, index, array) {
         result[index] = deepClone(child);
       });
-    } else if (typeof item === "object") {
+    } else if (typeof item === 'object') {
       // testing that this is DOM
-      if (item.nodeType && typeof item.cloneNode === "function") {
+      if (item.nodeType && typeof item.cloneNode === 'function') {
         result = item.cloneNode(true);
       } else if (!item.prototype) {
         // check that this is a literal
@@ -62,13 +62,13 @@ export const detectFeature = () => {
   // Test via a getter in the options object to see if the passive property is accessed
   let supportsPassive = false;
   try {
-    const opts = Object.defineProperty({}, "passive", {
+    const opts = Object.defineProperty({}, 'passive', {
       get: function () {
         supportsPassive = true;
       },
     });
-    window.addEventListener("testPassive", null, opts);
-    window.removeEventListener("testPassive", null, opts);
+    window.addEventListener('testPassive', null, opts);
+    window.removeEventListener('testPassive', null, opts);
   } catch (e) {}
 
   return supportsPassive;
