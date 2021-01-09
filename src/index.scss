@@ -45,33 +45,29 @@ $alpha-black: rgba(0, 0, 0, 1);
   pointer-events: none;
   stroke: black;
   text-shadow: -2.4px -2.4px $alpha-white, -2.4px 2.4px $alpha-white,
-  2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white,
-  -2.4px 0 $alpha-white, 0 2.4px $alpha-white, 2.4px 0 $alpha-white,
-  0 -2.4px $alpha-white;
+    2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white, -2.4px 0 $alpha-white,
+    0 2.4px $alpha-white, 2.4px 0 $alpha-white, 0 -2.4px $alpha-white;
 
   &.inverted {
     stroke: white;
     text-shadow: -2.4px -2.4px $alpha-black, -2.4px 2.4px $alpha-black,
-    2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black,
-    -2.4px 0 $alpha-black, 0 2.4px $alpha-black, 2.4px 0 $alpha-black,
-    0 -2.4px $alpha-black;
+      2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black, -2.4px 0 $alpha-black,
+      0 2.4px $alpha-black, 2.4px 0 $alpha-black, 0 -2.4px $alpha-black;
   }
 }
 
 .node-measure-text {
   stroke: black;
   text-shadow: -2.4px -2.4px $alpha-white, -2.4px 2.4px $alpha-white,
-    2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white,
-    -2.4px 0 $alpha-white, 0 2.4px $alpha-white, 2.4px 0 $alpha-white,
-    0 -2.4px $alpha-white;
+    2.4px 2.4px $alpha-white, 2.4px -2.4px $alpha-white, -2.4px 0 $alpha-white,
+    0 2.4px $alpha-white, 2.4px 0 $alpha-white, 0 -2.4px $alpha-white;
   pointer-events: none;
 
   &.inverted {
     stroke: white;
     text-shadow: -2.4px -2.4px $alpha-black, -2.4px 2.4px $alpha-black,
-    2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black,
-    -2.4px 0 $alpha-black, 0 2.4px $alpha-black, 2.4px 0 $alpha-black,
-    0 -2.4px $alpha-black;
+      2.4px 2.4px $alpha-black, 2.4px -2.4px $alpha-black, -2.4px 0 $alpha-black,
+      0 2.4px $alpha-black, 2.4px 0 $alpha-black, 0 -2.4px $alpha-black;
   }
 
   &.head-text {

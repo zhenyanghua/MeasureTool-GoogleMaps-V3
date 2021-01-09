@@ -76,4 +76,4 @@ export const detectFeature = () => {
 
 export const getClass = (name, inverted = false) => {
   return inverted ? `${name} inverted` : name;
-}
+};

@@ -1,16 +1,16 @@
-import {drag} from 'd3-drag';
-import {select, selectAll} from 'd3-selection';
-import {Config} from './config';
+import { drag } from 'd3-drag';
+import { select, selectAll } from 'd3-selection';
+import { Config } from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
 import ProjectionUtility from './projection-utility';
-import {Geometry} from './geometry';
-import {Segment} from './segment';
+import { Geometry } from './geometry';
+import { Segment } from './segment';
 import Helper from './helper';
-import {UnitTypeId} from './UnitTypeId';
-import {EVENT_START, EVENT_END, EVENT_CHANGE} from './events';
-import {ObjectAssign} from './polyfills';
-import {deepClone, getClass} from './utils';
+import { UnitTypeId } from './UnitTypeId';
+import { EVENT_START, EVENT_END, EVENT_CHANGE } from './events';
+import { ObjectAssign } from './polyfills';
+import { deepClone, getClass } from './utils';
 import './index.scss';
 
 export default class MeasureTool {
@@ -36,7 +36,7 @@ export default class MeasureTool {
 
   get points() {
     return (
-      deepClone(this._geometry.nodes.map((x) => ({lat: x[1], lng: x[0]}))) ||
+      deepClone(this._geometry.nodes.map((x) => ({ lat: x[1], lng: x[0] }))) ||
       []
     );
   }
@@ -80,7 +80,7 @@ export default class MeasureTool {
     this._containerDiv = this._map.getDiv().querySelector('div:first-child');
 
     if (this._options.contextMenu) {
-      this._contextMenu = new ContextMenu(this._containerDiv, {width: 160});
+      this._contextMenu = new ContextMenu(this._containerDiv, { width: 160 });
       this._startElementNode = this._contextMenu.addItem(
         'Measure distance',
         true,
@@ -176,7 +176,7 @@ export default class MeasureTool {
     this._mapClickEvent = this._map.addListener('click', (mouseEvent) =>
       this._checkClick(mouseEvent)
     );
-    this._map.setOptions({draggableCursor: 'default'});
+    this._map.setOptions({ draggableCursor: 'default' });
     this._started = true;
 
     if (typeof this._events.get(EVENT_START) === 'function') {
@@ -205,7 +205,7 @@ export default class MeasureTool {
     this._onRemoveOverlay();
     this._setOverlay();
     this._overlay.setMap(null);
-    this._map.setOptions({draggableCursor: null});
+    this._map.setOptions({ draggableCursor: null });
 
     this._started = false;
   }
@@ -282,7 +282,9 @@ export default class MeasureTool {
       .append('svg')
       .attr('class', `${Config.prefix}-svg-overlay`);
 
-    this._svgOverlay.append('defs').append('filter')
+    this._svgOverlay
+      .append('defs')
+      .append('filter')
       .attr('id', 'circle-shadow')
       .append('feDropShadow')
       .attr('dx', 0)
@@ -391,7 +393,9 @@ export default class MeasureTool {
       .datum((d, i) => [d, i])
       .style('filter', 'url(#circle-shadow)')
       .attr('class', ([, i]) =>
-        i === 0 ? `${getClass('cover-circle', this._options.invertColor)} head-circle` : getClass('cover-circle', this._options.invertColor)
+        i === 0
+          ? `${getClass('cover-circle', this._options.invertColor)} head-circle`
+          : getClass('cover-circle', this._options.invertColor)
       )
       .attr('r', 5)
       .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
@@ -513,7 +517,10 @@ export default class MeasureTool {
     let text = this._segmentText
       .selectAll('text')
       .data(this._geometry.lines)
-      .attr('class', getClass('segment-measure-text', this._options.invertColor))
+      .attr(
+        'class',
+        getClass('segment-measure-text', this._options.invertColor)
+      )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', (d) => {
@@ -528,7 +535,10 @@ export default class MeasureTool {
     text
       .enter()
       .append('text')
-      .attr('class', getClass('segment-measure-text', this._options.invertColor))
+      .attr(
+        'class',
+        getClass('segment-measure-text', this._options.invertColor)
+      )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', (d) => {
@@ -548,7 +558,12 @@ export default class MeasureTool {
       .selectAll('text')
       .data(this._geometry.nodes)
       .attr('class', (d, i) =>
-        i === 0 ? `${getClass('node-measure-text', this._options.invertColor)} head-text` : getClass('node-measure-text', this._options.invertColor)
+        i === 0
+          ? `${getClass(
+              'node-measure-text',
+              this._options.invertColor
+            )} head-text`
+          : getClass('node-measure-text', this._options.invertColor)
       )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
@@ -568,7 +583,12 @@ export default class MeasureTool {
       .enter()
       .append('text')
       .attr('class', (d, i) =>
-        i === 0 ? `${getClass('node-measure-text', this._options.invertColor)} head-text` : getClass('node-measure-text', this._options.invertColor)
+        i === 0
+          ? `${getClass(
+              'node-measure-text',
+              this._options.invertColor
+            )} head-text`
+          : getClass('node-measure-text', this._options.invertColor)
       )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
@@ -718,7 +738,9 @@ export default class MeasureTool {
 
     lineDrag.on('start', (event) => {
       event.sourceEvent.stopPropagation();
-      this._hoverCircle.select('circle').attr('class', getClass('cover-circle', this._options.invertColor));
+      this._hoverCircle
+        .select('circle')
+        .attr('class', getClass('cover-circle', this._options.invertColor));
       this._disableMapScroll();
     });
 
@@ -741,7 +763,8 @@ export default class MeasureTool {
         i + 1,
         this._projectionUtility.svgPointToLatLng([event.x, event.y])
       );
-      this._hoverCircle.select('circle')
+      this._hoverCircle
+        .select('circle')
         .style('filter', 'url(#circle-shadow)')
         .attr('class', getClass('grey-circle', this._options.invertColor));
       this._linesBase.selectAll('line').style('display', 'inline');
@@ -911,9 +934,9 @@ export default class MeasureTool {
           offset > tolerance
             ? 0
             : this._helper.computeArea([
-              pointToCompare,
-              ...this._geometry.nodes.slice(1, n - 1),
-            ]);
+                pointToCompare,
+                ...this._geometry.nodes.slice(1, n - 1),
+              ]);
       } else if (i === n - 1) {
         offset = this._helper.computeLengthBetween(
           pointToCompare,
@@ -932,10 +955,10 @@ export default class MeasureTool {
           offset > tolerance
             ? 0
             : this._helper.computeArea([
-              ...this._geometry.nodes.slice(0, i),
-              pointToCompare,
-              ...this._geometry.nodes.slice(i + 1),
-            ]);
+                ...this._geometry.nodes.slice(0, i),
+                pointToCompare,
+                ...this._geometry.nodes.slice(i + 1),
+              ]);
       } else {
         offset = this._helper.computeLengthBetween(
           this._geometry.nodes[0],
