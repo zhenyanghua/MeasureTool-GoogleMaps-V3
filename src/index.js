@@ -282,16 +282,6 @@ export default class MeasureTool {
       .append('svg')
       .attr('class', `${Config.prefix}-svg-overlay`);
 
-    this._svgOverlay
-      .append('defs')
-      .append('filter')
-      .attr('id', 'circle-shadow')
-      .append('feDropShadow')
-      .attr('dx', 0)
-      .attr('dy', 0)
-      .attr('stdDeviation', 0.5)
-      .attr('flood-color', 'white');
-
     this._linesBase = this._svgOverlay.append('g').attr('class', 'base');
     this._linesBase.selectAll('line').data(this._geometry.lines);
 
@@ -323,7 +313,6 @@ export default class MeasureTool {
       .attr('class', 'hover-circle');
     this._hoverCircle
       .append('circle')
-      .style('filter', 'url(#circle-shadow)')
       .attr('class', getClass('grey-circle', this._options.invertColor))
       .attr('r', 5);
 
@@ -391,7 +380,6 @@ export default class MeasureTool {
       .data(this._geometry.nodes)
       .join('circle')
       .datum((d, i) => [d, i])
-      .style('filter', 'url(#circle-shadow)')
       .attr('class', ([, i]) =>
         i === 0
           ? `${getClass('cover-circle', this._options.invertColor)} head-circle`
@@ -421,7 +409,6 @@ export default class MeasureTool {
     circles
       .enter()
       .append('circle')
-      .style('filter', 'url(#circle-shadow)')
       .attr('class', getClass('cover-circle', this._options.invertColor))
       .attr('r', 5)
       .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
@@ -765,7 +752,6 @@ export default class MeasureTool {
       );
       this._hoverCircle
         .select('circle')
-        .style('filter', 'url(#circle-shadow)')
         .attr('class', getClass('grey-circle', this._options.invertColor));
       this._linesBase.selectAll('line').style('display', 'inline');
       this._linesAux.selectAll('line').style('display', 'inline');
