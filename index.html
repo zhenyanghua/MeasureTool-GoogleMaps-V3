@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, max-scale=1.0">
     <meta charset="utf-8">
-    <title>MeasureTool for Google Maps API</title>
-    <link rel="icon"
-          type="image/png"
-          href="/images/leafyjava52x52-trans.png">
+    <title>MeasureTool for Google Maps JS API</title>
     <style>
-        /* Always set the map height explicitly to define the size of the div
-         * element that contains the map. */
+        #container {
+          height: 100%;
+          box-sizing: border-box;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+        }
         #map {
-            height: 100%;
+            height: 500px;
+            width: 100%;
         }
 
         #instructions {
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 25px;
-            margin: 10px;
-            background-color: white;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.6);
-            max-width: 400px;
+          flex: 1 1 auto;
+          padding: 0 20px;
         }
 
         #instructions a {
@@ -34,39 +32,48 @@
             padding-bottom: 0.4rem;
         }
 
-        .ads {
-            text-align: center;
-        }
-
         /* Optional: Makes the sample page fill the window. */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            font-family: "Roboto", Arial, SansSerif;
+            font-family: "Roboto", Arial, SansSerif, sans-serif;
+        }
+
+        @media (min-width: 768px) {
+          #container {
+            flex-wrap: nowrap;
+            padding: 20px;
+          }
         }
     </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="instructions">
-    <h3><a href="https://www.leafyjava.com">Back to LeafyJava</a></h3>
-    <h3>How to Use Measure Tool in Google Maps API</h3>
+<div id="container">
+  <div id="instructions">
+    <h1>How to Use Measure Tool in Google Maps JS API</h1>
     <ol>
-        <li>To <strong>start</strong> measuring, <em>right click</em> the map and choose “<em>Measure distance</em>”.</li>
-        <li><em>Left click</em> the map, and the measurement between the two locations will display.
-            Keep clicking to add more measurement waypoints.</li>
-        <li>To <strong>remove</strong> a waypoint, <em>left click</em> on the waypoint <em>(the first point cannot be removed)</em>.</li>
-        <li>To <strong>insert</strong> a waypoint on the measurement line, <em>left click</em> the line.
-            Waypoints can be moved by clicking and dragging them.</li>
-        <li>When the <em>first point</em> and the <em>last point</em> are close enough, the <strong>area</strong> will display.</li>
-        <li>To <strong>end</strong> measuring, <em>right click</em> the map and choose “<em>Clear measurement</em>”.</li>
+      <li>To <strong>start</strong> measuring, <em>right click</em> the map and choose “<em>Measure distance</em>”.</li>
+      <li><em>Left click</em> the map, and the measurement between the two locations will display.
+        Keep clicking to add more measurement waypoints.</li>
+      <li>To <strong>remove</strong> a waypoint, <em>left click</em> on the waypoint <em>(the first point cannot be removed)</em>.</li>
+      <li>To <strong>insert</strong> a waypoint on the measurement line, <em>left click</em> the line.
+        Waypoints can be moved by clicking and dragging them.</li>
+      <li>When the <em>first point</em> and the <em>last point</em> are close enough, the <strong>area</strong> will display.</li>
+      <li>To <strong>end</strong> measuring, <em>right click</em> the map and choose “<em>Clear measurement</em>”.</li>
     </ol>
     <p>
-        Visit <a target="_blank" href="https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3" title="Project site">the project page</a> to find out more <strong>advanced</strong> use.
+      Visit <a target="_blank" href="https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3" title="Project site">the project page</a> to find out more <strong>advanced</strong> use.
     </p>
+    <h3><a href="https://zhenyanghua.github.io">Other Demos</a></h3>
+  </div>
+  <div id="map">
+    <div id="controls">
+
+    </div>
+  </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/measuretool-googlemaps-v3/lib/MeasureTool.min.js"></script>
+<script src="https://unpkg.com/measuretool-googlemaps-v3"></script>
 <script>
 	var map, measureTool;
 	function initMap() {
@@ -81,6 +88,5 @@
 	}
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTdH3AFSWLD3SrgbNqTGoRsg3U6W0qAAg&libraries=geometry&callback=initMap" async defer></script>
-
 </body>
 </html>
