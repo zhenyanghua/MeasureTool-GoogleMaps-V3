@@ -206,6 +206,7 @@ export default class MeasureTool {
     this._setOverlay();
     this._overlay.setMap(null);
     this._map.setOptions({ draggableCursor: null });
+    this._hideTooltip();
 
     this._started = false;
   }
