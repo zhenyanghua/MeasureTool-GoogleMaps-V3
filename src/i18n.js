@@ -23,6 +23,10 @@ const i18n = {
     tooltipText1: 'Faites glisser pour modifier, cliquez pour supprimer',
     tooltipText2: 'Faites glisser pour modifier',
   },
+  pt: {
+    tooltipText1: 'Arraste para alterar, clique para remover',
+    tooltipText2: 'Arraste para alterar',
+  },
 };
 
 export default i18n;
