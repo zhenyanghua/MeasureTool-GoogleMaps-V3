@@ -13,9 +13,10 @@ $alpha-black: rgba(0, 0, 0, 1);
   fill: white;
   stroke: black;
   stroke-width: 2.5px;
-  &:hover {
-    cursor: pointer;
-  }
+}
+.touch-circle {
+  fill: transparent;
+  cursor: pointer;
 }
 
 .grey-circle {
@@ -37,7 +38,7 @@ $alpha-black: rgba(0, 0, 0, 1);
 .aux-line {
   fill: none;
   stroke: transparent;
-  stroke-width: 8px;
+  stroke-width: 12px;
   cursor: pointer;
 }
 
