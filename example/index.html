@@ -35,38 +35,92 @@
 </div>
 <script src="../dist/gmaps-measuretool.umd.js"></script>
 <script>
+  const center = {lat: 41.70, lng: -71.47};
+  const segments = [
+    {
+      "lat": 41.69547509615208,
+      "lng": -71.36993408203125
+    },
+    {
+      "lat": 41.434490308949215,
+      "lng": -71.3671875
+    },
+    {
+      "lat": 41.50857729743936,
+      "lng": -71.20513916015625
+    },
+    {
+      "lat": 41.66923209813446,
+      "lng": -71.18435546874998
+    },
+    {
+      "lat": 41.80245339578072,
+      "lng": -71.34365722656248
+    },
+    {
+      "lat": 41.910875425626266,
+      "lng": -71.39034912109373
+    },
+    {
+      "lat": 42.01299182987659,
+      "lng": -71.38760253906248
+    },
+    {
+      "lat": 42.01299182987659,
+      "lng": -71.80508300781248
+    },
+    {
+      "lat": 41.69957665997156,
+      "lng": -71.795654296875
+    },
+    {
+      "lat": 41.3566211272796,
+      "lng": -71.82156249999998
+    },
+    {
+      "lat": 41.37723402378496,
+      "lng": -71.49471923828123
+    },
+    {
+      "lat": 41.6154423246811,
+      "lng": -71.48529052734375
+    },
+    {
+
+      "lat": 41.69547509615208,
+      "lng": -71.36993408203125
+    }
+  ];
+
   var map, measureTool;
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 47.94796, lng: -116.702975},
-      zoom: 16,
+      center,
+      zoom: 9,
       scaleControl: true
     });
     measureTool = new MeasureTool(map, {
       contextMenu: false,
-      showSegmentLength: true,
-      tooltip: true,
-      language: 'zh',
       unit: MeasureTool.UnitTypeId.METRIC // metric, imperial, or nautical
     });
 
-    var marker1 = new google.maps.Marker({
-      position: {lat: 47.94796, lng: -116.70797},
-      map: map,
-      label: "1"
-    });
-    marker1.addListener('click', function() {
-      alert("Marker 1 has been clicked");
-    });
-
-    var marker2 = new google.maps.Marker({
-      position: {lat: 47.95028, lng: -116.69907},
-      map: map,
-      label: "2"
-    });
-    marker2.addListener('click', function() {
-      alert("Marker 2 has been clicked");
-    });
+    // var marker1 = new google.maps.Marker({
+    //   position: {lat: 47.94796, lng: -116.70797},
+    //   map: map,
+    //   label: "1"
+    // });
+    // marker1.addListener('click', function() {
+    //   alert("Marker 1 has been clicked");
+    // });
+    //
+    // var marker2 = new google.maps.Marker({
+    //   position: {lat: 47.95028, lng: -116.69907},
+    //   map: map,
+    //   label: "2"
+    // });
+    // marker2.addListener('click', function() {
+    //   alert("Marker 2 has been clicked");
+    // });
 
     // test for setting units
 //    measureTool.setOption('unit', MeasureTool.UnitTypeId.METRIC);
@@ -87,7 +141,7 @@
 
   let inverted = false;
   document.querySelector('#start-with-points')
-      .addEventListener('click', () => measureTool.start([{lat: 47.94796, lng: -116.70797}, {lat: 47.95028, lng: -116.69907}]));
+      .addEventListener('click', () => measureTool.start(segments));
   document.querySelector('#start')
       .addEventListener('click', () => measureTool.start());
   document.querySelector('#end')

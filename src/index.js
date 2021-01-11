@@ -13,6 +13,10 @@ import { ObjectAssign } from './polyfills';
 import { deepClone, getClass } from './utils';
 import './index.scss';
 
+const nodeTargetRadius = 5;
+const nodeTargetExpandRadius = 6;
+const touchTargetRadius = 12;
+
 export default class MeasureTool {
   get lengthText() {
     return this._helper.formatLength(this._length || 0);
@@ -107,18 +111,6 @@ export default class MeasureTool {
   }
 
   _bindToggleContextMenu() {
-    this._containerDiv.addEventListener('touchstart', (touchEvent) => {
-      console.debug('touched', touchEvent);
-      if (touchEvent.targetTouches.length === 2) {
-        console.debug('2 finger touches');
-      }
-    });
-    this._containerDiv.addEventListener('touchend', (touchEvent) => {
-      console.debug('touch end', touchEvent);
-      if (touchEvent.targetTouches.length === 2) {
-        console.debug('2 finger touches');
-      }
-    });
     this._map.addListener('contextmenu', (mouseEvent) => {
       this._firstClick = mouseEvent;
       this._contextMenu.show(
@@ -292,10 +284,16 @@ export default class MeasureTool {
     this._lineDrag = this._svgOverlay.append('g').attr('class', 'drag');
     this._lineDrag.selectAll('line').data(this._geometry.lines);
 
+    // base node - presentational
     this._nodeCircles = this._svgOverlay
       .append('g')
       .attr('class', 'node-circle');
     this._nodeCircles.selectAll('circle').data(this._geometry.nodes);
+
+    // touch target node
+    this._touchCircles = this._svgOverlay
+      .append('g')
+      .attr('class', 'touch-circle');
 
     if (this._options.showSegmentLength) {
       this._segmentText = this._svgOverlay
@@ -315,7 +313,7 @@ export default class MeasureTool {
     this._hoverCircle
       .append('circle')
       .attr('class', getClass('grey-circle', this._options.invertColor))
-      .attr('r', 5);
+      .attr('r', nodeTargetRadius);
 
     if (this._initComplete && !this._started) {
       this._overlay.setMap(null);
@@ -328,6 +326,7 @@ export default class MeasureTool {
    */
   _onDrawOverlay() {
     this._updateCircles();
+    this._updateTouchCircles();
     this._updateLine();
     if (this._options.showSegmentLength) {
       this._updateSegmentText();
@@ -363,7 +362,7 @@ export default class MeasureTool {
     // Use circle radius 'r' as a flag to determine if it is a delete or add event.
     if (
       !this._dragged &&
-      this._nodeCircles.selectAll('circle[r="6"]').size() === 0 &&
+      this._touchCircles.selectAll(`circle[r="${nodeTargetExpandRadius}"]`).size() === 0 &&
       !this._hoverCircle.select('circle').attr('cx')
     ) {
       const node = [mouseEvent.latLng.lng(), mouseEvent.latLng.lat()];
@@ -386,22 +385,65 @@ export default class MeasureTool {
           ? `${getClass('cover-circle', this._options.invertColor)} head-circle`
           : getClass('cover-circle', this._options.invertColor)
       )
-      .attr('r', 5)
+      .attr('r', nodeTargetRadius)
       .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
       .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
       .on('mouseover', function (event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d]) {
-        self._onOutCircle(d, this);
+      .on('mouseout', function (event, [d, i]) {
+        self._onOutCircle(d, i, this);
+      })
+      .on('mousedown', () => this._hideTooltip());
+
+    // enter and seat the new data with same style.
+    circles
+      .enter()
+      .append('circle')
+      .attr('class', getClass('cover-circle', this._options.invertColor))
+      .attr('r', nodeTargetRadius)
+      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .on('mouseover', function (event, [d, i]) {
+        self._onOverCircle(d, i, this);
+      })
+      .on('mouseout', function (event, [d, i]) {
+        self._onOutCircle(d, i, this);
+      })
+      .on('mousedown', () => this._hideTooltip());
+
+    this._nodeCircles.selectAll('.removed-circle').remove();
+  }
+
+  _updateTouchCircles() {
+    let self = this;
+    // join with old data
+    let circles = this._touchCircles
+      .selectAll('circle')
+      .data(this._geometry.nodes)
+      .join('circle')
+      .datum((d, i) => [d, i])
+      .attr('class', ([, i]) =>
+        i === 0
+          ? `${getClass('touch-circle', this._options.invertColor)} head-circle`
+          : getClass('touch-circle', this._options.invertColor)
+      )
+      .attr('r', touchTargetRadius)
+      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
+      .on('mouseover', function (event, [d, i]) {
+        self._onOverCircle(d, i, this);
+      })
+      .on('mouseout', function (event, [d, i]) {
+        self._onOutCircle(d, i, this);
       })
       .on('touchstart', function (event, [d, i]) {
         event.preventDefault();
         self._onOverCircle(d, i, this, true);
       })
-      .on('touchend', function (event, [d]) {
+      .on('touchend', function (event, [d, i]) {
         event.preventDefault();
-        self._onOutCircle(d, this);
+        self._onOutCircle(d, i, this);
       })
       .on('mousedown', () => this._hideTooltip())
       .call(this._onDragCircle());
@@ -410,28 +452,28 @@ export default class MeasureTool {
     circles
       .enter()
       .append('circle')
-      .attr('class', getClass('cover-circle', this._options.invertColor))
-      .attr('r', 5)
+      .attr('class', getClass('touch-circle', this._options.invertColor))
+      .attr('r', touchTargetRadius)
       .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
       .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
       .on('mouseover', function (event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d]) {
-        self._onOutCircle(d, this);
+      .on('mouseout', function (event, [d, i]) {
+        self._onOutCircle(d, i, this);
       })
       .on('touchstart', function (event, [d, i]) {
         event.preventDefault();
         self._onOverCircle(d, i, this, true);
       })
-      .on('touchend', function (event, [d]) {
+      .on('touchend', function (event, [d, i]) {
         event.preventDefault();
-        self._onOutCircle(d, this);
+        self._onOutCircle(d, i, this);
       })
       .on('mousedown', () => this._hideTooltip())
       .call(this._onDragCircle());
 
-    this._nodeCircles.selectAll('.removed-circle').remove();
+    this._touchCircles.selectAll('.removed-circle').remove();
   }
 
   _updateLine() {
@@ -482,6 +524,10 @@ export default class MeasureTool {
       })
       .on('mouseout', () => this._hideHoverCircle())
       .on('mousedown', () => this._hideTooltip())
+      .on('touchstart', e => {
+        // prevent simulated mouse events
+        e.preventDefault();
+      })
       .call(this._onDragLine(linesAux, linesBase));
 
     linesAux.exit().remove();
@@ -597,7 +643,12 @@ export default class MeasureTool {
 
   _onOverCircle(d, i, target, isTouch = false) {
     if (this._dragging) return;
-    select(target).attr('r', 6);
+    let selection = select(target);
+    if (!selection.classed('base')) {
+      selection = this._nodeCircles.select(`circle:nth-child(${i + 1})`);
+    }
+    selection.attr('r', nodeTargetExpandRadius);
+
     if (this._options.tooltip && !isTouch) {
       this._tooltip.show(
         this._projectionUtility.latLngToContainerPoint(d),
@@ -608,8 +659,12 @@ export default class MeasureTool {
     }
   }
 
-  _onOutCircle(d, target) {
-    select(target).attr('r', 5);
+  _onOutCircle(d, i, target) {
+    let selection = select(target);
+    if (!selection.classed('base')) {
+      selection = this._nodeCircles.select(`circle:nth-child(${i + 1})`);
+    }
+    selection.attr('r', nodeTargetRadius);
     this._hideTooltip();
   }
 
@@ -624,6 +679,7 @@ export default class MeasureTool {
       select(this).attr('cx', event.x).attr('cy', event.y);
       self._updateLinePosition.call(self, self._linesBase, i, event);
       self._updateLinePosition.call(self, self._linesAux, i, event);
+      self._updateNodeCirclePosition(i, event);
       if (self._options.showSegmentLength) {
         self._updateSegmentTextPosition(i, event);
       }
@@ -638,7 +694,7 @@ export default class MeasureTool {
 
     circleDrag.on('start', function (event) {
       event.sourceEvent.stopPropagation();
-      select(this).raise().attr('r', 6);
+      select(this).raise().attr('r', nodeTargetExpandRadius);
       self._disableMapScroll();
     });
 
@@ -858,6 +914,12 @@ export default class MeasureTool {
       }
       return this._helper.formatLength(len);
     });
+  }
+
+  _updateNodeCirclePosition(index, event) {
+    this._nodeCircles.select(`circle:nth-child(${index + 1})`)
+      .attr('cx', event.x)
+      .attr('cy', event.y);
   }
 
   _updateHoverCirclePosition(x, y) {
