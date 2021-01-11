@@ -1,4 +1,17 @@
 # Changes
+## v1.0.2
+*Released on 01/11/2021*
+- **[Enhancement]**
+  - Optimized touch target in touch screen (#78)
+  - Added `pt-BR` language support (#75)
+- **[Bug fixes]**
+  - Hide Tooltip when measurement is ended (#76)
+
+# v1.0.1
+*Released on 01/10/2021*
+- **[Bug fixes]**
+  - Removed the SVG filter which causing performance degrade while dragging.
+  
 ## v1.0.0
 *Released on 01/09/2021*
 - **[Enhancement]**
