@@ -196,7 +196,7 @@ export default class Helper {
    * @private
    */
   static _interpolate(p1, p2, fraction) {
-    let point = google.maps.geometry.spherical.interpolate(
+    const point = google.maps.geometry.spherical.interpolate(
       new google.maps.LatLng(p1[1], p1[0]),
       new google.maps.LatLng(p2[1], p2[0]),
       fraction
@@ -208,5 +208,53 @@ export default class Helper {
     // let x = p1[0] + (p2[0] - p1[0]) * fraction;
     // let y = m * x + b;
     // return [x, y];
+  }
+
+  /**
+   * if last segment length (start with 0) adds current segment length is less than tick length,
+   *    segment length = last segment length + segment length
+   *    last segment length = segment length;
+   *    move on to the next segment
+   *
+   * current point = compute the latlng using fraction (tick length - last segment length ) / current segment length
+   *     between current segment start point and end point.
+   * segment length = segment length - (tick length - last segment length)
+   *
+   * While the given minimum tick length is less than the segment length,
+   *    compute the latlng at the fraction between current point and the end point.
+   *    push the latlng
+   *    assign the latlng to current point.
+   *    segment length subtracts tick length.
+   *
+   * @param segments
+   * @param length
+   * @param includeSegmentNodes
+   */
+  interpolatePointsOnPath(segments, length, includeSegmentNodes = false) {
+    if (segments.length === 0) return [];
+    let lastSegmentLength = 0, curPoint = segments[0][0], points = [];
+    for (let i = 0; i < segments.length; i++) {
+      if (includeSegmentNodes) points.push(segments[i][0]);
+      let segmentLength = this.computeLengthBetween(segments[i][0], segments[i][1]);
+      if (lastSegmentLength + segmentLength < length) {
+        segmentLength += lastSegmentLength;
+        lastSegmentLength = segmentLength;
+        continue;
+      }
+      curPoint = Helper._interpolate(
+        segments[i][0],
+        segments[i][1],
+        (length - lastSegmentLength) / segmentLength);
+      segmentLength -= (length - lastSegmentLength);
+      points.push(curPoint);
+      while(length < segmentLength) {
+        curPoint = Helper._interpolate(curPoint, segments[i][1], length / segmentLength);
+        points.push(curPoint);
+        segmentLength -= length;
+        lastSegmentLength = segmentLength;
+      }
+    }
+    if (includeSegmentNodes) points.push(segments[segments.length - 1][1]);
+    return points;
   }
 }

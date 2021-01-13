@@ -1,5 +1,6 @@
 import { drag } from 'd3-drag';
 import { select, selectAll } from 'd3-selection';
+import { geoPath, geoTransform } from 'd3-geo';
 import { Config } from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
@@ -73,6 +74,7 @@ export default class MeasureTool {
     this._id = Helper.makeId(4);
     this._events = new Map();
     this._geometry = new Geometry();
+    this._computeTickLength();
     this._init();
   }
 
@@ -275,6 +277,12 @@ export default class MeasureTool {
       .append('svg')
       .attr('class', `${Config.prefix}-svg-overlay`);
 
+    const { paths, gmPath } = this._getProjectedPath();
+    this._tickPath = this._svgOverlay
+      .append('g')
+      .attr('class', 'tick-path');
+    this._tickPath.selectAll("path").data(paths);
+
     this._linesBase = this._svgOverlay.append('g').attr('class', 'base');
     this._linesBase.selectAll('line').data(this._geometry.lines);
 
@@ -328,6 +336,7 @@ export default class MeasureTool {
     this._updateCircles();
     this._updateTouchCircles();
     this._updateLine();
+    this._updatePath();
     if (this._options.showSegmentLength) {
       this._updateSegmentText();
     }
@@ -545,6 +554,35 @@ export default class MeasureTool {
     const lineDrag = this._lineDrag.selectAll('line').data([]);
 
     lineDrag.exit().remove();
+  }
+
+  _updatePath() {
+    const { paths, gmPath } = this._getProjectedPath();
+    const tickPath = this._tickPath.selectAll('path')
+      .data(paths)
+      .attr("class", "tick-path")
+      .attr('d', gmPath);
+    tickPath.exit().remove();
+    tickPath.enter()
+      .append('path')
+      .attr('d', gmPath);
+  }
+
+  _getProjectedPath() {
+    const self = this;
+    this._computeTickLength();
+    const points = this._helper.interpolatePointsOnPath(
+      this._geometry.lines, this._tickLength, true
+    );
+    const paths = [Geometry.toLineString(points)];
+    const gmTransform = geoTransform({
+      point: function(lat, lng) {
+        const [x, y] = self._projectionUtility.latLngToSvgPoint([lat, lng]);
+        this.stream.point(x, y);
+      }
+    });
+    const gmPath = geoPath().projection(gmTransform);
+    return { paths, gmPath };
   }
 
   _updateSegmentText() {
@@ -1080,5 +1118,11 @@ export default class MeasureTool {
         points: this.points,
       },
     };
+  }
+
+  _computeTickLength() {
+    const metersPerPixel = 156543.03392 * Math.cos(this._map.getCenter().lat() * Math.PI / 180)
+      / Math.pow(2, this._map.getZoom());
+    this._tickLength = metersPerPixel * 30;
   }
 }

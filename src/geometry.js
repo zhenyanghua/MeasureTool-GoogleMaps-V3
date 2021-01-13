@@ -12,6 +12,16 @@ export class Geometry {
     return segments;
   }
 
+  static toLineString(points) {
+    return {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": points
+      }
+    }
+  }
+
   constructor() {
     this._nodes = [];
   }
@@ -31,4 +41,6 @@ export class Geometry {
   insertNode(i, point) {
     this._nodes.splice(i, 0, point);
   }
+
+
 }
