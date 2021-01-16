@@ -1,6 +1,6 @@
 import { drag } from 'd3-drag';
 import { select, selectAll } from 'd3-selection';
-import { geoPath, geoTransform } from 'd3-geo';
+import { geoPath, geoTransform, geoClipRectangle } from 'd3-geo';
 import { Config } from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
@@ -67,7 +67,7 @@ export default class MeasureTool {
       initialSegments: [],
       language: navigator ? navigator.language : 'en',
       invertColor: false,
-      ...options,
+      ...options
     };
     this._map = map;
     this._map.setClickableIcons(false);
@@ -107,7 +107,7 @@ export default class MeasureTool {
     }
 
     this._helper = new Helper({
-      unit: this._options.unit,
+      unit: this._options.unit
     });
     this._initOverlay();
   }
@@ -281,7 +281,22 @@ export default class MeasureTool {
     this._tickPath = this._svgOverlay
       .append('g')
       .attr('class', 'tick-path');
-    this._tickPath.selectAll("path").data(paths);
+    this._tickPath.selectAll('path').data(paths);
+
+    this._ticks = this._svgOverlay
+      .append('g')
+      .attr('class', 'ticks');
+    this._ticks.append('marker')
+      .attr('id', 'marker-small-ticks')
+      .attr('markerHeight', 3)
+      .attr('markerWidth', 1)
+      .attr('markerUnits', 'strokeWidth')
+      .attr('orient', 'auto')
+      .attr('refX', 0)
+      .attr('refY', 0)
+      .attr('viewBox', '-1 0 2 5')
+      .append('path')
+      .attr('d', 'M 0,0 m -1,0 L 1,0 L 1,5 L -1,5 Z');
 
     this._linesBase = this._svgOverlay.append('g').attr('class', 'base');
     this._linesBase.selectAll('line').data(this._geometry.lines);
@@ -395,12 +410,12 @@ export default class MeasureTool {
           : getClass('cover-circle', this._options.invertColor)
       )
       .attr('r', nodeTargetRadius)
-      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .on('mouseover', function (event, [d, i]) {
+      .attr('cx', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[1])
+      .on('mouseover', function(event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d, i]) {
+      .on('mouseout', function(event, [d, i]) {
         self._onOutCircle(d, i, this);
       })
       .on('mousedown', () => this._hideTooltip());
@@ -411,12 +426,12 @@ export default class MeasureTool {
       .append('circle')
       .attr('class', getClass('cover-circle', this._options.invertColor))
       .attr('r', nodeTargetRadius)
-      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .on('mouseover', function (event, [d, i]) {
+      .attr('cx', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[1])
+      .on('mouseover', function(event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d, i]) {
+      .on('mouseout', function(event, [d, i]) {
         self._onOutCircle(d, i, this);
       })
       .on('mousedown', () => this._hideTooltip());
@@ -438,19 +453,19 @@ export default class MeasureTool {
           : getClass('touch-circle', this._options.invertColor)
       )
       .attr('r', touchTargetRadius)
-      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .on('mouseover', function (event, [d, i]) {
+      .attr('cx', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[1])
+      .on('mouseover', function(event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d, i]) {
+      .on('mouseout', function(event, [d, i]) {
         self._onOutCircle(d, i, this);
       })
-      .on('touchstart', function (event, [d, i]) {
+      .on('touchstart', function(event, [d, i]) {
         event.preventDefault();
         self._onOverCircle(d, i, this, true);
       })
-      .on('touchend', function (event, [d, i]) {
+      .on('touchend', function(event, [d, i]) {
         event.preventDefault();
         self._onOutCircle(d, i, this);
       })
@@ -463,19 +478,19 @@ export default class MeasureTool {
       .append('circle')
       .attr('class', getClass('touch-circle', this._options.invertColor))
       .attr('r', touchTargetRadius)
-      .attr('cx', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[0])
-      .attr('cy', ([d]) => this._projectionUtility.latLngToSvgPoint(d)[1])
-      .on('mouseover', function (event, [d, i]) {
+      .attr('cx', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[0])
+      .attr('cy', ([d]) => this._projectionUtility.lngLatToSvgPoint(d)[1])
+      .on('mouseover', function(event, [d, i]) {
         self._onOverCircle(d, i, this);
       })
-      .on('mouseout', function (event, [d, i]) {
+      .on('mouseout', function(event, [d, i]) {
         self._onOutCircle(d, i, this);
       })
-      .on('touchstart', function (event, [d, i]) {
+      .on('touchstart', function(event, [d, i]) {
         event.preventDefault();
         self._onOverCircle(d, i, this, true);
       })
-      .on('touchend', function (event, [d, i]) {
+      .on('touchend', function(event, [d, i]) {
         event.preventDefault();
         self._onOutCircle(d, i, this);
       })
@@ -492,10 +507,10 @@ export default class MeasureTool {
       .selectAll('line')
       .data(this._geometry.lines)
       .attr('class', getClass('base-line', this._options.invertColor))
-      .attr('x1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
-      .attr('y1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
-      .attr('x2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr('y2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+      .attr('x1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[0])
+      .attr('y1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[1])
+      .attr('x2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[0])
+      .attr('y2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[1])
       .each((d) => this._updateSegment(d));
 
     linesBase.exit().remove();
@@ -503,10 +518,10 @@ export default class MeasureTool {
       .enter()
       .append('line')
       .attr('class', getClass('base-line', this._options.invertColor))
-      .attr('x1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
-      .attr('y1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
-      .attr('x2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr('y2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1])
+      .attr('x1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[0])
+      .attr('y1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[1])
+      .attr('x2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[0])
+      .attr('y2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[1])
       .each((d) => this._updateSegment(d));
 
     let linesAux = this._linesAux
@@ -515,17 +530,17 @@ export default class MeasureTool {
       .join('line')
       .datum((d, i) => [d, i])
       .attr('class', 'aux-line')
-      .attr('x1', ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
-      .attr('y1', ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
-      .attr('x2', ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr('y2', ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+      .attr('x1', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[0])[0])
+      .attr('y1', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[0])[1])
+      .attr('x2', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[1])[0])
+      .attr('y2', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[1])[1]);
 
     linesAux
       .on('mousemove', (event, [d]) => {
         let point = Helper.findTouchPoint(
           [
-            this._projectionUtility.latLngToSvgPoint(d[0]),
-            this._projectionUtility.latLngToSvgPoint(d[1]),
+            this._projectionUtility.lngLatToSvgPoint(d[0]),
+            this._projectionUtility.lngLatToSvgPoint(d[1])
           ],
           [event.offsetX, event.offsetY]
         );
@@ -546,10 +561,10 @@ export default class MeasureTool {
       .join('line')
       .datum((d, i) => [d, i])
       .attr('class', 'aux-line')
-      .attr('x1', ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
-      .attr('y1', ([d]) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
-      .attr('x2', ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-      .attr('y2', ([d]) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+      .attr('x1', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[0])[0])
+      .attr('y1', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[0])[1])
+      .attr('x2', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[1])[0])
+      .attr('y2', ([d]) => this._projectionUtility.lngLatToSvgPoint(d[1])[1]);
 
     const lineDrag = this._lineDrag.selectAll('line').data([]);
 
@@ -560,27 +575,43 @@ export default class MeasureTool {
     const { paths, gmPath } = this._getProjectedPath();
     const tickPath = this._tickPath.selectAll('path')
       .data(paths)
-      .attr("class", "tick-path")
+      .attr('class', 'tick-path')
       .attr('d', gmPath);
+
     tickPath.exit().remove();
-    tickPath.enter()
+    tickPath
+      .enter()
       .append('path')
-      .attr('d', gmPath);
+      .attr('d', gmPath)
+    .attr('marker-start', `url(#marker-small-ticks)`)
+    .attr('marker-mid', `url(#marker-small-ticks)`)
+    .attr('marker-end', `url(#marker-small-ticks)`);
   }
 
   _getProjectedPath() {
     const self = this;
     this._computeTickLength();
+    // FIXME - interpolate every points along a line that span across the world
+    //  when the zoom level is large kills the performance. Need a different way
+    //  of to partial interpolate the points that only within the bounds.
+    //  todo - check if d3 projection handles geodesic projection for start/end
     const points = this._helper.interpolatePointsOnPath(
       this._geometry.lines, this._tickLength, true
     );
+    console.debug('points count', points.length);
     const paths = [Geometry.toLineString(points)];
     const gmTransform = geoTransform({
-      point: function(lat, lng) {
-        const [x, y] = self._projectionUtility.latLngToSvgPoint([lat, lng]);
-        this.stream.point(x, y);
+      point: function(lng, lat) {
+        if (self._map.getBounds().contains({ lat, lng })) {
+          const [x, y] = self._projectionUtility.lngLatToSvgPoint([lng, lat]);
+          this.stream.point(x, y);
+        }
       }
     });
+    // const { east, north, south, west } = this._map.getBounds().toJSON();
+    // const [x0, y0] = this._projectionUtility.latLngToSvgPoint([south, west]);
+    // const [x1, y1] = this._projectionUtility.latLngToSvgPoint([north, east]);
+    // const clip = geoClipRectangle(x0, y0, x1, y1);
     const gmPath = geoPath().projection(gmTransform);
     return { paths, gmPath };
   }
@@ -596,8 +627,8 @@ export default class MeasureTool {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', (d) => {
-        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
-        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        let p1 = this._projectionUtility.lngLatToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.lngLatToSvgPoint(d[1]);
         return Helper.transformText(p1, p2);
       })
       .text((d, i) =>
@@ -614,8 +645,8 @@ export default class MeasureTool {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-before-edge')
       .attr('transform', (d) => {
-        let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
-        let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+        let p1 = this._projectionUtility.lngLatToSvgPoint(d[0]);
+        let p2 = this._projectionUtility.lngLatToSvgPoint(d[1]);
         return Helper.transformText(p1, p2);
       })
       .text((d, i) =>
@@ -632,14 +663,14 @@ export default class MeasureTool {
       .attr('class', (d, i) =>
         i === 0
           ? `${getClass(
-              'node-measure-text',
-              this._options.invertColor
-            )} head-text`
+          'node-measure-text',
+          this._options.invertColor
+          )} head-text`
           : getClass('node-measure-text', this._options.invertColor)
       )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
-      .attr('x', (d) => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('x', (d) => this._projectionUtility.lngLatToSvgPoint(d)[0])
       .attr('y', this._transformNodeTextY.bind(this))
       .text((d, i) => {
         let len = this._helper.computePathLength(
@@ -657,14 +688,14 @@ export default class MeasureTool {
       .attr('class', (d, i) =>
         i === 0
           ? `${getClass(
-              'node-measure-text',
-              this._options.invertColor
-            )} head-text`
+          'node-measure-text',
+          this._options.invertColor
+          )} head-text`
           : getClass('node-measure-text', this._options.invertColor)
       )
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'text-after-edge')
-      .attr('x', (d) => this._projectionUtility.latLngToSvgPoint(d)[0])
+      .attr('x', (d) => this._projectionUtility.lngLatToSvgPoint(d)[0])
       .attr('y', this._transformNodeTextY.bind(this))
       .text((d, i) => {
         let len = this._helper.computePathLength(
@@ -689,7 +720,7 @@ export default class MeasureTool {
 
     if (this._options.tooltip && !isTouch) {
       this._tooltip.show(
-        this._projectionUtility.latLngToContainerPoint(d),
+        this._projectionUtility.lngLatToContainerPoint(d),
         i === 0
           ? Config.tooltipText2(this._options.language)
           : Config.tooltipText1(this._options.language)
@@ -710,7 +741,7 @@ export default class MeasureTool {
     let self = this;
     let isDragged = false;
 
-    let circleDrag = drag().on('drag', function (event, [, i]) {
+    let circleDrag = drag().on('drag', function(event, [, i]) {
       isDragged = true;
       self._dragging = true;
 
@@ -730,13 +761,13 @@ export default class MeasureTool {
       );
     });
 
-    circleDrag.on('start', function (event) {
+    circleDrag.on('start', function(event) {
       event.sourceEvent.stopPropagation();
       select(this).raise().attr('r', nodeTargetExpandRadius);
       self._disableMapScroll();
     });
 
-    circleDrag.on('end', function (event, [d, i]) {
+    circleDrag.on('end', function(event, [d, i]) {
       self._enableMapScroll();
       if (!isDragged) {
         if (i > 0) {
@@ -789,10 +820,10 @@ export default class MeasureTool {
           .enter()
           .append('line')
           .attr('class', getClass('base-line', this._options.invertColor))
-          .attr('x1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[0])
-          .attr('y1', (d) => this._projectionUtility.latLngToSvgPoint(d[0])[1])
-          .attr('x2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[0])
-          .attr('y2', (d) => this._projectionUtility.latLngToSvgPoint(d[1])[1]);
+          .attr('x1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[0])
+          .attr('y1', (d) => this._projectionUtility.lngLatToSvgPoint(d[0])[1])
+          .attr('x2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[0])
+          .attr('y2', (d) => this._projectionUtility.lngLatToSvgPoint(d[1])[1]);
 
         this._linesBase.selectAll('line').style('display', 'none');
         this._linesAux.selectAll('line').style('display', 'none');
@@ -877,7 +908,7 @@ export default class MeasureTool {
         .select(`text:nth-child(${index + 1})`)
         .attr('transform', (d) => {
           let p1 = [event.x, event.y];
-          let p2 = this._projectionUtility.latLngToSvgPoint(d[1]);
+          let p2 = this._projectionUtility.lngLatToSvgPoint(d[1]);
           return Helper.transformText(p1, p2);
         })
         .text((d) =>
@@ -893,7 +924,7 @@ export default class MeasureTool {
       this._segmentText
         .select(`text:nth-child(${index})`)
         .attr('transform', (d) => {
-          let p1 = this._projectionUtility.latLngToSvgPoint(d[0]);
+          let p1 = this._projectionUtility.lngLatToSvgPoint(d[0]);
           let p2 = [event.x, event.y];
           return Helper.transformText(p1, p2);
         })
@@ -916,7 +947,7 @@ export default class MeasureTool {
         let offset;
         if (
           index > 0 &&
-          this._projectionUtility.latLngToSvgPoint(
+          this._projectionUtility.lngLatToSvgPoint(
             this._geometry.nodes[index - 1]
           )[1] < event.y
         ) {
@@ -930,13 +961,13 @@ export default class MeasureTool {
       let offset;
       if (
         index + 1 > 0 &&
-        event.y < this._projectionUtility.latLngToSvgPoint(d)[1]
+        event.y < this._projectionUtility.lngLatToSvgPoint(d)[1]
       ) {
         offset = 23;
       } else {
         offset = -7;
       }
-      return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
+      return this._projectionUtility.lngLatToSvgPoint(d)[1] + offset;
     });
     let followingNodes = this._nodeText
       .selectAll('text')
@@ -945,7 +976,7 @@ export default class MeasureTool {
       let len = this._helper.computePathLength([
         ...this._geometry.nodes.slice(0, index),
         this._projectionUtility.svgPointToLatLng([event.x, event.y]),
-        ...this._geometry.nodes.slice(index + 1, index + 1 + i),
+        ...this._geometry.nodes.slice(index + 1, index + 1 + i)
       ]);
       if (index + i === this._geometry.nodes.length - 1) {
         this._length = len;
@@ -978,12 +1009,12 @@ export default class MeasureTool {
 
   _disableMapScroll() {
     this._zoomControl = !!document.querySelector(
-      "button[aria-label='Zoom in']"
+      'button[aria-label=\'Zoom in\']'
     );
     this._map.setOptions({
       scrollwheel: false,
       gestureHandling: 'none',
-      zoomControl: false,
+      zoomControl: false
     });
   }
 
@@ -991,7 +1022,7 @@ export default class MeasureTool {
     this._map.setOptions({
       scrollwheel: true,
       gestureHandling: 'auto',
-      zoomControl: this._zoomControl,
+      zoomControl: this._zoomControl
     });
   }
 
@@ -1002,7 +1033,7 @@ export default class MeasureTool {
     } else {
       offset = -7;
     }
-    return this._projectionUtility.latLngToSvgPoint(d)[1] + offset;
+    return this._projectionUtility.lngLatToSvgPoint(d)[1] + offset;
   }
 
   _updateArea(i, pointToCompare) {
@@ -1021,9 +1052,9 @@ export default class MeasureTool {
           offset > tolerance
             ? 0
             : this._helper.computeArea([
-                pointToCompare,
-                ...this._geometry.nodes.slice(1, n - 1),
-              ]);
+              pointToCompare,
+              ...this._geometry.nodes.slice(1, n - 1)
+            ]);
       } else if (i === n - 1) {
         offset = this._helper.computeLengthBetween(
           pointToCompare,
@@ -1042,10 +1073,10 @@ export default class MeasureTool {
           offset > tolerance
             ? 0
             : this._helper.computeArea([
-                ...this._geometry.nodes.slice(0, i),
-                pointToCompare,
-                ...this._geometry.nodes.slice(i + 1),
-              ]);
+              ...this._geometry.nodes.slice(0, i),
+              pointToCompare,
+              ...this._geometry.nodes.slice(i + 1)
+            ]);
       } else {
         offset = this._helper.computeLengthBetween(
           this._geometry.nodes[0],
@@ -1115,14 +1146,15 @@ export default class MeasureTool {
         area: this.area,
         areaText: this.areaText,
         segments: this.segments,
-        points: this.points,
-      },
+        points: this.points
+      }
     };
   }
 
   _computeTickLength() {
-    const metersPerPixel = 156543.03392 * Math.cos(this._map.getCenter().lat() * Math.PI / 180)
-      / Math.pow(2, this._map.getZoom());
-    this._tickLength = metersPerPixel * 30;
+    // const metersPerPixel = 156543.03392 * Math.cos(this._map.getCenter().lat() * Math.PI / 180)
+    //   / Math.pow(2, this._map.getZoom());
+    // this._tickLength = metersPerPixel * 30;
+    this._tickLength = 1600000 / Math.pow(2, this._map.getZoom() - 1);
   }
 }

@@ -1,10 +1,12 @@
 import { UnitTypeId } from './UnitTypeId';
+import { Geometry } from './geometry';
 export default class Helper {
   constructor(options) {
     this._options = {
       unit: UnitTypeId.METRIC,
     };
     Object.assign(this._options, options);
+    this._lastInterpolatedPoints = { segments: [], length: 0, points: [] };
     this.init();
   }
 
@@ -231,6 +233,11 @@ export default class Helper {
    * @param includeSegmentNodes
    */
   interpolatePointsOnPath(segments, length, includeSegmentNodes = false) {
+    if (this._lastInterpolatedPoints.length === length &&
+      Geometry.equals(this._lastInterpolatedPoints.segments, segments))  {
+        return this._lastInterpolatedPoints.points;
+    }
+    console.debug('interpolatePointsOnPath called')
     if (segments.length === 0) return [];
     let lastSegmentLength = 0, curPoint = segments[0][0], points = [];
     for (let i = 0; i < segments.length; i++) {
@@ -255,6 +262,11 @@ export default class Helper {
       }
     }
     if (includeSegmentNodes) points.push(segments[segments.length - 1][1]);
+    this._lastInterpolatedPoints = {
+      length,
+      segments,
+      points
+    };
     return points;
   }
 }

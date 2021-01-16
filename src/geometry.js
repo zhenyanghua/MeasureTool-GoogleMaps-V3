@@ -42,5 +42,19 @@ export class Geometry {
     this._nodes.splice(i, 0, point);
   }
 
+  static equals(segments1, segments2) {
+    if (segments1.length !== segments2.length) {
+      return false;
+    }
+    for (let i = 0; i < segments1.length; i++) {
+      if (segments1[i][0][0] !== segments2[i][0][0] ||
+        segments1[i][0][1] !== segments2[i][0][1] ||
+        segments1[i][1][0] !== segments2[i][1][0] ||
+        segments1[i][1][1] !== segments2[i][1][1]) {
+        return false;
+      }
+    }
+    return true;
+  }
 
 }
