@@ -1,6 +1,6 @@
 import { drag } from 'd3-drag';
 import { select, selectAll } from 'd3-selection';
-import { geoPath, geoTransform, geoClipRectangle } from 'd3-geo';
+import { geoPath, geoTransform, geoClipRectangle, geoProjection, geoMercator } from 'd3-geo';
 import { Config } from './config';
 import ContextMenu from './context-menu';
 import Tooltip from './tooltip';
@@ -582,10 +582,10 @@ export default class MeasureTool {
     tickPath
       .enter()
       .append('path')
-      .attr('d', gmPath)
-    .attr('marker-start', `url(#marker-small-ticks)`)
-    .attr('marker-mid', `url(#marker-small-ticks)`)
-    .attr('marker-end', `url(#marker-small-ticks)`);
+      .attr('d', gmPath);
+    // .attr('marker-start', `url(#marker-small-ticks)`)
+    // .attr('marker-mid', `url(#marker-small-ticks)`)
+    // .attr('marker-end', `url(#marker-small-ticks)`);
   }
 
   _getProjectedPath() {
@@ -598,21 +598,25 @@ export default class MeasureTool {
     const points = this._helper.interpolatePointsOnPath(
       this._geometry.lines, this._tickLength, true
     );
-    console.debug('points count', points.length);
-    const paths = [Geometry.toLineString(points)];
+    // console.debug('points count', points.length);
+    // const paths = [Geometry.toLineString(points)];
+    const paths = [this._geometry.lingString];
     const gmTransform = geoTransform({
       point: function(lng, lat) {
-        if (self._map.getBounds().contains({ lat, lng })) {
+        // if (self._map.getBounds().contains({ lat, lng })) {
           const [x, y] = self._projectionUtility.lngLatToSvgPoint([lng, lat]);
           this.stream.point(x, y);
-        }
+        // }
       }
     });
     // const { east, north, south, west } = this._map.getBounds().toJSON();
-    // const [x0, y0] = this._projectionUtility.latLngToSvgPoint([south, west]);
-    // const [x1, y1] = this._projectionUtility.latLngToSvgPoint([north, east]);
+    // const [x0, y0] = this._projectionUtility.lngLatToSvgPoint([south, west]);
+    // const [x1, y1] = this._projectionUtility.lngLatToSvgPoint([north, east]);
     // const clip = geoClipRectangle(x0, y0, x1, y1);
-    const gmPath = geoPath().projection(gmTransform);
+    const projection = geoMercator();
+    // projection.postclip(clip);
+    const gmPath = geoPath(projection).projection(gmTransform);
+
     return { paths, gmPath };
   }
 

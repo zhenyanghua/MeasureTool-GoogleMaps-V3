@@ -12,6 +12,10 @@ export class Geometry {
     return segments;
   }
 
+  get lingString() {
+    return Geometry.toLineString(this._nodes);
+  }
+
   static toLineString(points) {
     return {
       "type": "Feature",
