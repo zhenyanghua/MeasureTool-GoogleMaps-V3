@@ -19,4 +19,6 @@ export const Config = {
     getProp(langCode, 'tooltipText1'),
   tooltipText2: (langCode = defaultLangCode) =>
     getProp(langCode, 'tooltipText2'),
+  distanceAndLength: (langCode = defaultLangCode) =>
+    getProp(langCode, 'distanceAndLength'),
 };
