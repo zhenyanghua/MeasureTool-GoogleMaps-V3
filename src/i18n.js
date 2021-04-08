@@ -27,6 +27,14 @@ const i18n = {
     tooltipText1: 'Arraste para alterar, clique para remover',
     tooltipText2: 'Arraste para alterar',
   },
+  uk: {
+    tooltipText1: 'Перетягніть, щоб змінити, натисніть, щоб видалити',
+    tooltipText2: 'Перетягніть, щоб змінити',
+  },
+  ru: {
+    tooltipText1: 'Перетащите, чтобы изменить, нажмите, чтобы удалить',
+    tooltipText2: 'Перетащите, чтобы изменить',
+  },
 };
 
 export default i18n;
