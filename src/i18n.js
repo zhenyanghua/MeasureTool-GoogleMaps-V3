@@ -29,6 +29,14 @@ const i18n = {
     tooltipText2: 'Arraste para alterar',
     distanceAndLength: (lenght, area) => `Distância total: ${lenght}; Área total: ${area}.`
   },
+  uk: {
+    tooltipText1: 'Перетягніть, щоб змінити, натисніть, щоб видалити',
+    tooltipText2: 'Перетягніть, щоб змінити',
+  },
+  ru: {
+    tooltipText1: 'Перетащите, чтобы изменить, нажмите, чтобы удалить',
+    tooltipText2: 'Перетащите, чтобы изменить',
+  },
 };
 
 export default i18n;
