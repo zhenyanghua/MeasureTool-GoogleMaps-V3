@@ -1024,7 +1024,7 @@ export default class MeasureTool {
       this._nodeText
         .select(':last-child')
         .text(
-          `Total distance: ${this.lengthText}; Total area: ${this.areaText}.`
+          Config.distanceAndLength(this._options.language)(this.lengthText, this.areaText)
         );
     }
   }

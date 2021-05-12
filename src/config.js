@@ -3,13 +3,15 @@ import i18n from './i18n';
 const defaultLangCode = 'en';
 
 const getProp = (langCode, prop) => {
-  if (i18n[langCode]) {
+  if (i18n[langCode] && i18n[langCode][prop]) {
     return i18n[langCode][prop];
   }
+
   const code = langCode.split('-')[0];
-  if (i18n[code]) {
+  if (i18n[code] && i18n[code][prop]) {
     return i18n[code][prop];
   }
+
   return i18n[defaultLangCode][prop];
 };
 
@@ -19,4 +21,6 @@ export const Config = {
     getProp(langCode, 'tooltipText1'),
   tooltipText2: (langCode = defaultLangCode) =>
     getProp(langCode, 'tooltipText2'),
+  distanceAndLength: (langCode = defaultLangCode) =>
+    getProp(langCode, 'distanceAndLength'),
 };
