@@ -32,6 +32,7 @@
   "homepage": "https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3#readme",
   "dependencies": {
     "d3-drag": "^2.0.0",
+    "d3-geo": "^2.0.1",
     "d3-selection": "^2.0.0"
   },
   "devDependencies": {
