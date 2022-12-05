@@ -1,8 +1,10 @@
-import resolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
-import styles from 'rollup-plugin-styles';
-import { terser } from 'rollup-plugin-terser';
-import pkg from './package.json';
+import fs from 'fs';
+import resolve from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+import terser from '@rollup/plugin-terser';
+import sass from 'rollup-plugin-sass';
+
+const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 function onwarn (warning, warn) {
   if (warning.code === 'CIRCULAR_DEPENDENCY') {
@@ -21,9 +23,10 @@ const umd = {
   plugins: [
     resolve(),
     babel({
+      babelHelpers: 'bundled',
       exclude: ['node_modules/**']
     }),
-    styles(),
+    sass(),
     terser()
   ],
   onwarn
@@ -39,9 +42,10 @@ const esm = {
   plugins: [
     resolve(),
     babel({
+      babelHelpers: 'bundled',
       exclude: ['node_modules/**']
     }),
-    styles()
+    sass()
   ],
   onwarn
 };
