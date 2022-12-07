@@ -26,7 +26,7 @@ const umd = {
       babelHelpers: 'bundled',
       exclude: ['node_modules/**']
     }),
-    sass(),
+    sass({ insert: true }),
     terser()
   ],
   onwarn
@@ -45,7 +45,7 @@ const esm = {
       babelHelpers: 'bundled',
       exclude: ['node_modules/**']
     }),
-    sass()
+    sass({ insert: true })
   ],
   onwarn
 };
