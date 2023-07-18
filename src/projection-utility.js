@@ -8,7 +8,7 @@ export default class ProjectionUtility {
     this._projection = projection;
   }
 
-  latLngToSvgPoint(coords) {
+  lngLatToSvgPoint(coords) {
     let rate = this._options.offsetRate / 2;
     let latLng = new google.maps.LatLng(coords[1], coords[0]);
     let svgPoint = this._projection.fromLatLngToDivPixel(latLng);
@@ -29,7 +29,7 @@ export default class ProjectionUtility {
     );
   }
 
-  latLngToContainerPoint(coords) {
+  lngLatToContainerPoint(coords) {
     return this._projection.fromLatLngToContainerPixel(
       new google.maps.LatLng(coords[1], coords[0])
     );

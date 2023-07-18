@@ -12,6 +12,20 @@ export class Geometry {
     return segments;
   }
 
+  get lingString() {
+    return Geometry.toLineString(this._nodes);
+  }
+
+  static toLineString(points) {
+    return {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": points
+      }
+    }
+  }
+
   constructor() {
     this._nodes = [];
   }
@@ -31,4 +45,20 @@ export class Geometry {
   insertNode(i, point) {
     this._nodes.splice(i, 0, point);
   }
+
+  static equals(segments1, segments2) {
+    if (segments1.length !== segments2.length) {
+      return false;
+    }
+    for (let i = 0; i < segments1.length; i++) {
+      if (segments1[i][0][0] !== segments2[i][0][0] ||
+        segments1[i][0][1] !== segments2[i][0][1] ||
+        segments1[i][1][0] !== segments2[i][1][0] ||
+        segments1[i][1][1] !== segments2[i][1][1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

@@ -46,4 +46,4 @@ const esm = {
   onwarn
 };
 
-export default [umd, esm];
+export default [esm];

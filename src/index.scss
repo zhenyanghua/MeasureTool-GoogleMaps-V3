@@ -26,6 +26,22 @@ $alpha-black: rgba(0, 0, 0, 1);
   pointer-events: none;
 }
 
+.tick-path {
+  fill: none;
+  stroke: red;
+  stroke-width: 6px;
+  pointer-events: none;
+}
+
+.ticks {
+  pointer-events: none;
+  marker {
+    path {
+      fill: blue;
+    }
+  }
+}
+
 .base-line {
   fill: none;
   stroke: black;
