@@ -2,6 +2,7 @@ const i18n = {
   en: {
     tooltipText1: 'Drag to change, click to remove',
     tooltipText2: 'Drag to change',
+    distanceAndLength: (lenght, area) => `Total distance: ${lenght}; Total area: ${area}.`
   },
   it: {
     tooltipText1: 'Trascina per modificare, fai clic per rimuovere',
@@ -26,6 +27,7 @@ const i18n = {
   pt: {
     tooltipText1: 'Arraste para alterar, clique para remover',
     tooltipText2: 'Arraste para alterar',
+    distanceAndLength: (lenght, area) => `Distância total: ${lenght}; Área total: ${area}.`
   },
   uk: {
     tooltipText1: 'Перетягніть, щоб змінити, натисніть, щоб видалити',
